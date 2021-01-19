@@ -98,6 +98,9 @@
                           "x-csrf-token" js/csrfToken}
                          :params
                          @state
+                         :handler
+                         (fn [ok]
+                           (swap! state assoc :flash [_ "OK" "User created"]))
                          :error-handler
                          (fn [{:keys [status status-text fail response] :as err}]
                            (swap! state assoc :flash [status status-text (get-in response [:status :type])]))}))
