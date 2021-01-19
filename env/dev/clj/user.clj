@@ -7,7 +7,7 @@
     [expound.alpha :as expound]
     [mount.core :as mount]
     [luminus-scratchpad.core :refer [start-app]]
-    [luminus-scratchpad.db.core]
+    [luminus-scratchpad.db.core :as db]
     [conman.core :as conman]
     [luminus-migrations.core :as migrations]))
 
@@ -63,6 +63,16 @@
 (comment
   (do
     (reset-db)
-    (create-migration "enable-uuid-ossp")
-    (create-migration "add-users-table")))
+    (migrate)))
 
+(comment
+  (mount/start)
+
+  (db/insert-user! {:status "active"
+                    :email "mksybr@gmail.com"
+                    :username "mksybr"
+                    :password "OceanicReterritorializationProcess"
+                    :user_data (db/clj->jsonb-pgobj "{}")
+                    :permissions (db/clj->jsonb-pgobj {:role :user})})
+
+  )

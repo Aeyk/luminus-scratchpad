@@ -1,21 +1,90 @@
--- :name create-user! :! :n
--- :doc creates a new user record
-INSERT INTO users
-(id, first_name, last_name, email, pass)
-VALUES (:id, :first_name, :last_name, :email, :pass)
+-- :name all-users
+-- :command :query
+-- :result :many
+-- :doc Selects all users
+SELECT
+  id,
+  status,
+  email,
+  username,
+  password,
+  user_data,
+  history,
+  permissions
+  FROM
+      users;
 
--- :name update-user! :! :n
--- :doc updates an existing user record
-UPDATE users
-SET first_name = :first_name, last_name = :last_name, email = :email
-WHERE id = :id
+-- :name get-user-by-id
+-- :command :query
+-- :result :one
+-- :doc Selects the user matching the id
+SELECT
+  id,
+  status,
+  email,
+  username,
+  password,
+  user_data,
+  history,
+  permissions
+  FROM
+      users
+ WHERE
+  id = :id ::uuid;
 
--- :name get-user :? :1
--- :doc retrieves a user record given the id
-SELECT * FROM users
-WHERE id = :id
+-- :name get-user-by-username
+-- :command :query
+-- :result :one
+-- :doc Selects the user matching the username
+SELECT
+  id,
+  status,
+  email,
+  username,
+  password,
+  user_data,
+  history,
+  permissions
+  FROM
+      users
+ WHERE
+  LOWER(username) = LOWER(:username);
 
--- :name delete-user! :! :n
--- :doc deletes a user record given the id
-DELETE FROM users
-WHERE id = :id
+-- :name get-user-by-email
+-- :command :query
+-- :result :one
+-- :doc Selects the user matching the email
+SELECT
+  id,
+  status,
+  email,
+  username,
+  password,
+  user_data,
+  history,
+  permissions
+  FROM
+      users
+ WHERE
+  LOWER(email) = LOWER(:email);
+
+-- :name insert-user!
+-- :command :insert
+-- :result :raw
+-- :doc Inserts a single user into users table
+  INSERT INTO users (
+    status,
+    email,
+    username,
+    password,
+    user_data,
+    permissions
+  )
+  VALUES (
+    :status,
+    :email,
+    :username,
+    :password,
+    :user_data,
+    :permissions
+  );

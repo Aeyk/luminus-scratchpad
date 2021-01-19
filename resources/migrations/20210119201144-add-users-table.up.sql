@@ -6,11 +6,14 @@ CREATE TABLE users
     email             text COLLATE pg_catalog."default" NOT NULL,
     username          text COLLATE pg_catalog."default" NOT NULL,
     password          text COLLATE pg_catalog."default" NOT NULL,
-    
+
     permissions JSONB,
+    user_data JSONB,
+    
     last_login TIMESTAMP,
     is_active BOOLEAN,
     pass VARCHAR(300),
+    status VARCHAR(64),
 
     CONSTRAINT account_pkey PRIMARY KEY (id),
     CONSTRAINT account_email_key UNIQUE (email),
