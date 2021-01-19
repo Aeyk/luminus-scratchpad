@@ -45,7 +45,9 @@
                  [ring/ring-core "1.8.2"]
                  [ring/ring-defaults "0.3.2"]
                  [selmer "1.12.31"]
-                 [thheller/shadow-cljs "2.11.5" :scope "provided"]]
+                 [thheller/shadow-cljs "2.11.5" :scope "provided"]
+                 [cljs-http "0.1.46"]
+                 ]
 
   :min-lein-version "2.0.0"
   
