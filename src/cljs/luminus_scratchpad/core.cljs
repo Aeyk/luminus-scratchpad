@@ -34,7 +34,8 @@
                 {:class (when @expanded? :is-active)}
                 [:div.navbar-start
                  [nav-link "#/" "Home" :home]
-                 [nav-link "#/about" "About" :about]]]]))
+                 [nav-link "#/about" "About" :about]
+                 [nav-link "#/login" "Login" :login]]]]))
 
 (defn about-page []
   [:section.section>div.container>div.content
@@ -45,6 +46,40 @@
    (when-let [docs @(rf/subscribe [:docs])]
      [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
 
+(defn login-page []
+  (let [state (r/atom {:username ""
+                       :password ""
+                       :password_confirmation ""})]
+    (fn []
+      [:section.section>div.container>div.content
+       [:form.section
+        {:on-submit (fn [e]
+                      (e.preventDefault)
+                      (js/console.log e))}
+        [:div.field
+         [:label.label "email"]
+         [:input.input
+          {:default-value (:username @state)
+           :on-change #(swap! state assoc :username (-> % .-target .-value))}]]
+        [:div.field
+         [:label.label "password"]
+         [:input.input.password
+          {:type :password
+           :default-value (:password @state)
+           :on-change #(swap! state assoc :password (-> % .-target .-value))}]]
+        [:div.field
+         [:label.label "password confirmation"]
+         [:input.input.password {:type :password
+                                 :default-value (:password_confirmation @state)
+                                 :on-change #(swap! state assoc :password_confirmation (-> % .-target .-value))}]]
+        [:div.control
+         [:input.button.is-primary
+          {:on-click (fn [e]
+                       (e.preventDefault)
+                       (js/console.log (clj->js @state)))
+           :default-value "Register an account"}]]]])))
+
+
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
     [:div
@@ -54,11 +89,14 @@
 (defn navigate! [match _]
   (rf/dispatch [:common/navigate match]))
 
+
 (def router
   (reitit/router
     [["/" {:name        :home
            :view        #'home-page
            :controllers [{:start (fn [_] (rf/dispatch [:page/init-home]))}]}]
+     ["/login" {:name :login
+                :view login-page}]
      ["/about" {:name :about
                 :view #'about-page}]]))
 

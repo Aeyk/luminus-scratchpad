@@ -60,4 +60,9 @@
   [name]
   (migrations/create name (select-keys env [:database-url])))
 
+(comment
+  (do
+    (reset-db)
+    (create-migration "enable-uuid-ossp")
+    (create-migration "add-users-table")))
 
