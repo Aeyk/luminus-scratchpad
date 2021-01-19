@@ -11,7 +11,8 @@
     [luminus-scratchpad.events]
     [reitit.core :as reitit]
     [reitit.frontend.easy :as rfe]
-    [clojure.string :as string])
+    [clojure.string :as string]
+    [ajax.core :refer [GET POST]])
   (:import goog.History))
 
 (defn nav-link [uri title page]
@@ -20,7 +21,7 @@
     :class (when (= page @(rf/subscribe [:common/page])) :is-active)}
    title])
 
-(defn navbar [] 
+(defn navbar []
   (r/with-let [expanded? (r/atom false)]
               [:nav.navbar.is-info>div.container
                [:div.navbar-brand
@@ -47,17 +48,31 @@
      [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
 
 (defn login-page []
-  (let [state (r/atom {:username ""
+  (let [state (r/atom {:email ""
+                       :username ""
                        :password ""
-                       :password_confirmation ""})]
+                       :password_confirmation ""
+                       :flash []})]
     (fn []
       [:section.section>div.container>div.content
+       (if (not (empty? (:flash @state)))
+         (let [[status text] (:flash @state)]
+           [:div.flash.is-danger
+            [:p.is-inline status]
+            [:p.is-inline text]]))
        [:form.section
-        {:on-submit (fn [e]
+        {:method "POST"
+         :action "/actions/register"
+         :on-submit (fn [e]
                       (e.preventDefault)
                       (js/console.log e))}
         [:div.field
          [:label.label "email"]
+         [:input.input
+          {:default-value (:email @state)
+           :on-change #(swap! state assoc :email (-> % .-target .-value))}]]
+        [:div.field
+         [:label.label "username"]
          [:input.input
           {:default-value (:username @state)
            :on-change #(swap! state assoc :username (-> % .-target .-value))}]]
@@ -76,7 +91,17 @@
          [:input.button.is-primary
           {:on-click (fn [e]
                        (e.preventDefault)
-                       (js/console.log (clj->js @state)))
+                       (POST
+                        "/actions/register"
+                        {:headers
+                         {"Accept" "application/transit+json"
+                          "x-csrf-token" js/csrfToken}
+                         :params
+                         @state
+                         :error-handler
+                         (fn [{:keys [status status-text]}]
+                           (swap! state assoc :flash [status status-text])
+                           (js/console.log [status status-text]))}))
            :default-value "Register an account"}]]]])))
 
 
