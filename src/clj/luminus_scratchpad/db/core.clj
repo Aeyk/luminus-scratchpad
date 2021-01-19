@@ -1,6 +1,7 @@
 (ns luminus-scratchpad.db.core
   (:require
     [cheshire.core :refer [generate-string parse-string]]
+    [buddy.hashers :as hashers]
     [next.jdbc.date-time]
     [next.jdbc.prepare]
     [next.jdbc.result-set]
@@ -74,3 +75,31 @@
                            (apply str (rest type-name)))]
         (.setObject stmt idx (.createArrayOf conn elem-type (to-array v)))
         (.setObject stmt idx (clj->jsonb-pgobj v))))))
+
+
+
+(defn username-exists? [user]
+  (some? (get-user-by-username user)))
+
+(defn email-exists? [user]
+  (some? (get-user-by-email user)))
+
+(defn add-user! [user]
+  (when (username-exists? user)
+    (throw (ex-info "Username is already in use!"
+                    {:type :username-conflict})))
+
+  (when (email-exists? user)
+    (throw (ex-info "Email is already in use!"
+                    {:type :email-conflict})))
+
+  (let [defaults {:permissions {:role :user} 
+                  :status      "active"
+                  :email    (:email user)
+                  :user_data   {}
+                  :password    "" #_(str (utils/gen-uuid))}
+        user     (-> (merge defaults user)
+                     (update :password hashers/encrypt))]
+
+    (insert-user! user)
+    {:status ["OK" user]}))
