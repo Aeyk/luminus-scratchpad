@@ -9,7 +9,7 @@ SELECT
   username,
   password,
   user_data,
-  history,
+  
   permissions
   FROM
       users;
@@ -25,7 +25,7 @@ SELECT
   username,
   password,
   user_data,
-  history,
+  
   permissions
   FROM
       users
@@ -43,7 +43,7 @@ SELECT
   username,
   password,
   user_data,
-  history,
+  
   permissions
   FROM
       users
@@ -61,7 +61,6 @@ SELECT
   username,
   password,
   user_data,
-  history,
   permissions
   FROM
       users
