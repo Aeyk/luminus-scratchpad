@@ -1,23 +1,24 @@
 (ns luminus-scratchpad.middleware
   (:require
-    [luminus-scratchpad.env :refer [defaults]]
-    [clojure.tools.logging :as log]
-    [luminus-scratchpad.layout :refer [error-page]]
-    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
-    [luminus-scratchpad.middleware.formats :as formats]
-    [muuntaja.middleware :refer [wrap-format wrap-params]]
-    [luminus-scratchpad.config :refer [env]]
-    [ring-ttl-session.core :refer [ttl-memory-store]]
-    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
-            [buddy.auth.accessrules :refer [restrict]]
-            [buddy.auth :refer [authenticated?]]
-    [buddy.auth.backends.token :refer [jwe-backend]]
-            [buddy.sign.jwt :refer [encrypt]]
-            [buddy.core.nonce :refer [random-bytes]][buddy.sign.util :refer [to-timestamp]])
-   (:import
-    [java.util Calendar Date]
-    ))
+   [ring.middleware.flash :refer [wrap-flash]]
+   [luminus-scratchpad.env :refer [defaults]]
+   [clojure.tools.logging :as log]
+   [luminus-scratchpad.layout :refer [error-page]]
+   [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
+   [luminus-scratchpad.middleware.formats :as formats]
+   [muuntaja.middleware :refer [wrap-format wrap-params]]
+   [luminus-scratchpad.config :refer [env]]
+   [ring-ttl-session.core :refer [ttl-memory-store]]
+   [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+   [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
+   [buddy.auth.accessrules :refer [restrict]]
+   [buddy.auth :refer [authenticated?]]
+   [buddy.auth.backends.token :refer [jwe-backend]]
+   [buddy.sign.jwt :refer [encrypt]]
+   [buddy.core.nonce :refer [random-bytes]][buddy.sign.util :refer [to-timestamp]])
+  (:import
+   [java.util Calendar Date]
+   ))
 
 (defn wrap-internal-error [handler]
   (fn [req]
@@ -36,7 +37,6 @@
      (error-page
        {:status 403
         :title "Invalid anti-forgery token"})}))
-
 
 (defn wrap-formats [handler]
   (let [wrapped (-> handler wrap-params (wrap-format formats/instance))]
@@ -79,6 +79,8 @@
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-auth
+      wrap-formats
+      wrap-flash
       (wrap-defaults
         (-> site-defaults
             (assoc-in [:security :anti-forgery] false)
