@@ -55,17 +55,17 @@
                        :flash []})]
     (fn []
       [:section.section>div.container>div.content
-       (if (not (empty? (:flash @state)))
-         (let [[status text] (:flash @state)]
-           [:div.flash.is-danger
-            [:p.is-inline status]
-            [:p.is-inline text]]))
        [:form.section
         {:method "POST"
          :action "/actions/register"
          :on-submit (fn [e]
                       (e.preventDefault)
                       (js/console.log e))}
+        (if (not (empty? (:flash @state)))
+          (let [[status text reason] (:flash @state)]
+            [:div.card.flash.is-danger.columns
+             [:p.subtitle.is-inline.column text]
+             [:p..subtitle.is-inline.column reason]]))
         [:div.field
          [:label.label "email"]
          [:input.input
@@ -99,9 +99,8 @@
                          :params
                          @state
                          :error-handler
-                         (fn [{:keys [status status-text]}]
-                           (swap! state assoc :flash [status status-text])
-                           (js/console.log [status status-text]))}))
+                         (fn [{:keys [status status-text fail response] :as err}]
+                           (swap! state assoc :flash [status status-text (get-in response [:status :type])]))}))
            :default-value "Register an account"}]]]])))
 
 

@@ -29,7 +29,7 @@
                :body   {:status "OK"}})
             (catch clojure.lang.ExceptionInfo e
               {:status 401
-               :body   {:status (str e)}}))))}}]
+               :body   {:status (ex-data e)}}))))}}]
    ["/docs" {:get (fn [_]
                     (-> (response/ok (-> "docs/docs.md" io/resource slurp))
                         (response/header "Content-Type" "text/plain; charset=utf-8")))}]])
