@@ -93,7 +93,8 @@
    :dev           [:project/dev :profiles/dev]
    :test          [:project/dev :project/test :profiles/test]
 
-   :project/dev  {:jvm-opts ["-Dconf=dev-config.edn" ]
+   :project/dev  {:jvm-opts ["-Dconf=dev-config.edn"
+                             "-Xmx3G"]
                   :dependencies [[binaryage/devtools "1.0.2"]
                                  [cider/piggieback "0.5.2"]
                                  [pjstadig/humane-test-output "0.10.0"]
