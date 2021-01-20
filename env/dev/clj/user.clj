@@ -62,7 +62,7 @@
 
 (comment
   (do
-    (reset-db)
+    (mount/start)
     (migrate)))
 
 (comment
@@ -76,4 +76,9 @@
                     :user_data (db/clj->jsonb-pgobj "{}")
                     :permissions (db/clj->jsonb-pgobj {:role :user})})
 
-  )
+  (db/login!
+   (db/get-user-by-email {:email "z@z.com"})))
+
+
+
+

@@ -89,13 +89,15 @@
                {"Accept" "application/transit+json"
                 "x-csrf-token" js/csrfToken}
                :params
-               @state
+               (into {"x-csrf-token" js/csrfToken}
+                     @state)
                :handler
                (fn [ok]
                  (swap! state assoc :flash [_ "OK" "User created"]))
                :error-handler
                (fn [{:keys [status status-text fail response] :as err}]
-                 (swap! state assoc :flash [status status-text (get-in response [:status :type])]))}))
+                 (swap! state assoc :flash [status status-text (get-in response [:status :type])])
+                 (js/console.log @state))}))
            :default-value "Sign in"}]]]])))
 
 
@@ -147,13 +149,14 @@
                        (POST
                         "/actions/register"
                         {:headers
-                         {"Accept" "application/transit+json"
-                          "x-csrf-token" js/csrfToken}
+                         {"Accept" "application/transit+json"}
                          :params
-                         @state
+                         (into {"x-csrf-token" js/csrfToken}
+                               @state)
                          :handler
                          (fn [ok]
-                           (swap! state assoc :flash [_ "OK" "User created"]))
+                           (swap! state assoc :flash [_ "OK" "User created"])
+                           (navigate! :me))
                          :error-handler
                          (fn [{:keys [status status-text fail response] :as err}]
                            (swap! state assoc :flash [status status-text (get-in response [:status :type])]))}))
@@ -187,7 +190,9 @@
      ["/login" {:name :login
                 :view login-page}]
      ["/about" {:name :about
-                :view #'about-page}]]))
+                :view #'about-page}]
+     ["/user" {:name :user
+                :view #'user-page}]]))
 
 (defn start-router! []
   (rfe/start!

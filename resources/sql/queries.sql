@@ -9,7 +9,7 @@ SELECT
   username,
   password,
   user_data,
-  
+  history,
   permissions
   FROM
       users;
@@ -25,7 +25,7 @@ SELECT
   username,
   password,
   user_data,
-  
+history,
   permissions
   FROM
       users
@@ -43,7 +43,7 @@ SELECT
   username,
   password,
   user_data,
-  
+  history,
   permissions
   FROM
       users
@@ -61,6 +61,7 @@ SELECT
   username,
   password,
   user_data,
+  history,
   permissions
   FROM
       users
@@ -77,6 +78,7 @@ SELECT
     username,
     password,
     user_data,
+    history,
     permissions
   )
   VALUES (
@@ -85,6 +87,7 @@ SELECT
     :username,
     :password,
     :user_data,
+    :history,
     :permissions
   );
 
@@ -92,6 +95,6 @@ SELECT
 -- :command :execute
 -- :result :affected
 -- :doc Update user history
-UPDATE account
+UPDATE users
    SET    history = :history
  WHERE  id = :id ::uuid;

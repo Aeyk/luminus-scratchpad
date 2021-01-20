@@ -56,12 +56,10 @@
   (restrict handler {:handler authenticated?
                      :on-error on-error}))
 
-(def secret (random-bytes 32))
+(defn basic-auth [db]
+  (fn [handler]
+    (wrap-authentication handler (auth/basic-auth-backend))))
 
-(def token-backend
-  (jwe-backend {:secret secret
-                :options {:alg :a256kw
-                          :enc :a128gcm}}))
 (defn auth
   "Middleware used in routes that require authentication. If request is not
    authenticated a 401 not authorized response will be returned"
@@ -71,28 +69,13 @@
       (handler request)
       (resp/unauthorized {:error "Not authorized"}))))
 
-(defn basic-auth [db]
-  (fn [handler]
-    (wrap-authentication handler (auth/basic-auth-backend))))
-
-(defn token [username]
-  (let [claims {:user (keyword username)
-                :exp (to-timestamp
-                       (.getTime
-                         (doto (Calendar/getInstance)
-                           (.setTime (Date.))
-                           (.add Calendar/HOUR_OF_DAY 1))))}]
-    (encrypt claims secret {:alg :a256kw :enc :a128gcm})))
-
-(defn wrap-auth [handler]
-  (let [backend token-backend]
-    (-> handler
-        (wrap-authentication backend)
-        (wrap-authorization backend))))
+(defn token-auth
+  "Middleware used on routes requiring token authentication"
+  [handler]
+  (wrap-authentication handler auth/token-backend))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
-      wrap-auth
       wrap-formats
       wrap-flash
       (wrap-defaults
