@@ -7,6 +7,7 @@ CREATE TABLE users
     username          text COLLATE pg_catalog."default" NOT NULL,
     password          text COLLATE pg_catalog."default" NOT NULL,
 
+    history JSONB,
     permissions JSONB,
     user_data JSONB,
     
