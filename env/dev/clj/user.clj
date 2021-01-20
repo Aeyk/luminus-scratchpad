@@ -72,6 +72,7 @@
                     :email "mksybr@gmail.com"
                     :username "mksybr"
                     :password "OceanicReterritorializationProcess"
+                    :history (db/clj->jsonb-pgobj "{}")
                     :user_data (db/clj->jsonb-pgobj "{}")
                     :permissions (db/clj->jsonb-pgobj {:role :user})})
 

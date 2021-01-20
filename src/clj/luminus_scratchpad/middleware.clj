@@ -1,7 +1,9 @@
 (ns luminus-scratchpad.middleware
   (:require
+   [ring.util.http-response :as resp]
    [ring.middleware.flash :refer [wrap-flash]]
    [luminus-scratchpad.env :refer [defaults]]
+   [luminus-scratchpad.auth :as auth]
    [clojure.tools.logging :as log]
    [luminus-scratchpad.layout :refer [error-page]]
    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
@@ -60,6 +62,18 @@
   (jwe-backend {:secret secret
                 :options {:alg :a256kw
                           :enc :a128gcm}}))
+(defn auth
+  "Middleware used in routes that require authentication. If request is not
+   authenticated a 401 not authorized response will be returned"
+  [handler]
+  (fn [request]
+    (if (authenticated? request)
+      (handler request)
+      (resp/unauthorized {:error "Not authorized"}))))
+
+(defn basic-auth [db]
+  (fn [handler]
+    (wrap-authentication handler (auth/basic-auth-backend))))
 
 (defn token [username]
   (let [claims {:user (keyword username)
@@ -84,5 +98,5 @@
       (wrap-defaults
         (-> site-defaults
             (assoc-in [:security :anti-forgery] false)
-            (assoc-in  [:session :store] (ttl-memory-store (* 60 30)))))
+            (assoc-in [:session :store] (ttl-memory-store (* 60 30)))))
       wrap-internal-error))

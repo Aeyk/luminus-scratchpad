@@ -87,3 +87,11 @@ SELECT
     :user_data,
     :permissions
   );
+
+-- :name update-user-history!
+-- :command :execute
+-- :result :affected
+-- :doc Update user history
+UPDATE account
+   SET    history = :history
+ WHERE  id = :id ::uuid;

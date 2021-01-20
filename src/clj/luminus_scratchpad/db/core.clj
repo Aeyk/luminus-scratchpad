@@ -94,7 +94,7 @@
                     {:type :email-conflict})))
 
   (let [defaults {:permissions {:role :user} 
-                  :status      "active"
+                  :status      "active" 
                   :email    (:email user)
                   :user_data   {}
                   :password    "" #_(str (utils/gen-uuid))}
@@ -103,3 +103,23 @@
 
     (insert-user! user)
     {:status ["OK" user]}))
+
+(defn timestamp
+  "Returns current timestamp in \"2018-07-11T09:38:06.370Z\" format.
+  Always UTC."
+  []
+  (.toString (java.time.Instant/now)))
+
+(defn- add-user-event!
+  ([user evt-name]
+   (add-user-event! user evt-name {}))
+  ([user evt-name data]
+   (let [defaults {:event-date (timestamp) :event evt-name}
+         evt      (merge defaults data)
+         user     (update-in user [:history :events] conj evt)]
+     (update-user-history! user))))
+
+(defn login! [user]
+  (add-user-event! user "login"))
+
+

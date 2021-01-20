@@ -36,7 +36,8 @@
                 [:div.navbar-start
                  [nav-link "#/" "Home" :home]
                  [nav-link "#/about" "About" :about]
-                 [nav-link "#/login" "Login" :login]]]]))
+                 [nav-link "#/login" "Login" :login]
+                 [nav-link "#/signup" "Signup" :signup]]]]))
 
 (defn about-page []
   [:section.section>div.container>div.content
@@ -48,6 +49,57 @@
      [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
 
 (defn login-page []
+  (let [state (r/atom {:email ""
+                       :username ""
+                       :password ""
+                       :flash []})]
+    (fn []
+      [:section.section>div.container>div.content
+       [:form.section
+        {:method "POST"
+         :action "/actions/login"
+         :on-submit (fn [e]
+                      (e.preventDefault)
+                      (js/console.log e))}
+        (if (not (empty? (:flash @state)))
+          (let [[status text reason] (:flash @state)]
+            [:div.card.flash.is-danger.columns
+             [:p.subtitle.is-inline.column status]
+             [:p.subtitle.is-inline.column text]
+             [:p..subtitle.is-inline.column reason]]))
+        [:div.field
+         [:label.label "email"]
+         [:input.input
+          {:default-value (:email @state)
+           :on-change #(swap! state assoc :email (-> % .-target .-value))}]]
+        [:div.field
+         [:label.label "password"]
+         [:input.input.password
+          {:type :password
+           :default-value (:password @state)
+           :on-change #(swap! state assoc :password (-> % .-target .-value))}]]
+        [:div.control
+         [:input.button.is-primary
+          {:on-click
+           (fn [e]
+             (e.preventDefault)
+             (POST
+              "/actions/login"
+              {:headers
+               {"Accept" "application/transit+json"
+                "x-csrf-token" js/csrfToken}
+               :params
+               @state
+               :handler
+               (fn [ok]
+                 (swap! state assoc :flash [_ "OK" "User created"]))
+               :error-handler
+               (fn [{:keys [status status-text fail response] :as err}]
+                 (swap! state assoc :flash [status status-text (get-in response [:status :type])]))}))
+           :default-value "Sign in"}]]]])))
+
+
+(defn signup-page []
   (let [state (r/atom {:email ""
                        :username ""
                        :password ""
@@ -64,6 +116,7 @@
         (if (not (empty? (:flash @state)))
           (let [[status text reason] (:flash @state)]
             [:div.card.flash.is-danger.columns
+             [:p.subtitle.is-inline.column status]
              [:p.subtitle.is-inline.column text]
              [:p..subtitle.is-inline.column reason]]))
         [:div.field
@@ -107,6 +160,13 @@
            :default-value "Register an account"}]]]])))
 
 
+
+
+
+
+
+(defn me-page [])
+
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
     [:div
@@ -122,6 +182,8 @@
     [["/" {:name        :home
            :view        #'home-page
            :controllers [{:start (fn [_] (rf/dispatch [:page/init-home]))}]}]
+     ["/signup" {:name :signup
+                :view signup-page}]
      ["/login" {:name :login
                 :view login-page}]
      ["/about" {:name :about
