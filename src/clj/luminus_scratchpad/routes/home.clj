@@ -6,9 +6,13 @@
    [luminus-scratchpad.jwt :as jwt]
    [clojure.java.io :as io]
    [luminus-scratchpad.middleware :as middleware]
-   [ring.util.response]
+   [ring.util.response :as resp]
    [buddy.hashers :as hashers]
+   [buddy.auth :as auth]
+   [buddy.auth.accessrules :as acl]
    [ring.util.http-response :as response]))
+
+
 
 (defn home-page [request]
   (layout/render request "home.html"))
@@ -24,9 +28,11 @@
                   (:password
                    (db/get-user-by-email {:email email})))]
     (if valid?
-      (ok (jwt/create-token email))
       (bad-request (str request) #_{:auth [email password]
-                                :message "wrong auth data"}))))
+                                :message "wrong auth data"})
+      (do
+        (ok (jwt/create-token email))
+        (resp/redirect "/me")))))
 
 
 (defn home-routes []
@@ -34,33 +40,21 @@
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
    ["/" {:get home-page}]
-   ["/user"
-    {:middleware [middleware/auth]
-     :get
-     {:handler
-      (fn [req]
-        (-> (response/ok "1")
-            (response/header "Content-Type" "text/plain; charset=utf-8")))}}]
 
+   ["/me"
+    {:middleware [middleware/wrap-formats]
+     :get
+     (fn [req]
+       (if (:identity req)
+         {:status 200 :body {:status (:identity req)} }
+         {:status 200 :body {:status "ANON"} }))}]
+   
    ["/actions/login"
     {:post
      {
       :middleware []
       :handler
-      #_login-handler
-      (fn [req]
-        (try
-          (do
-            #_(db/login! identity)
-            {:status 201
-             :body
-             {:identity  (:body-params req)
-              #_#_#_#_:clear (str req)
-              :jwt
-              (json/encode (jwt/sign {:id (:id identity)}))}})
-          (catch clojure.lang.ExceptionInfo e
-            {:status 401
-             :body   {:status (ex-data e)}})))}}]
+      login-handler}}]
 
    ["/actions/register"
     {:post
@@ -74,7 +68,8 @@
               (db/add-user! user)
               {:status 201
                :body
-               {:identity user
+               {#_#_:identity user
+                :identity (json/encode (jwt/sign {:id (:id user)}))
                 :jwt (json/encode (jwt/sign {:id (:id user)}))}})
             (catch clojure.lang.ExceptionInfo e
               {:status 401
