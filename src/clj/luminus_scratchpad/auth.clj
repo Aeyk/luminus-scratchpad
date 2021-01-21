@@ -7,14 +7,14 @@
    [luminus-scratchpad.jwt :as jwt]
    [luminus-scratchpad.db.core :as db]))
 
-;; (defn basic-auth
-;;   [request {:keys [username password]}]
-;;   (let [user (db/get-user-by-username username)]
-;;     (if (and user (hashers/check password (:password user)))
-;;       (-> user
-;;           (dissoc :password)
-;;           (assoc :token (jwt/create-token user)))
-;;       false)))
+(defn basic-auth
+  [request {:keys [username password]}]
+  (let [user (db/get-user-by-username username)]
+    (if (and user (hashers/check password (:password user)))
+      (-> user
+          (dissoc :password)
+          (assoc :token (jwt/create-token user)))
+      false)))
 
 (defn basic-auth-backend
   []
