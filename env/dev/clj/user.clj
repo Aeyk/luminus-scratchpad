@@ -7,9 +7,12 @@
    [expound.alpha :as expound]
    [mount.core :as mount]
    [luminus-scratchpad.core :refer [start-app]]
+   [ring.util.response :as resp]
    [buddy.auth.backends :refer [jws]]
    [luminus-scratchpad.auth :as auth]
    [buddy.auth.backends.httpbasic :refer [http-basic-backend]]
+   [luminus-scratchpad.jwt :as jwt]
+   [luminus-scratchpad.middleware :as middleware]
    [luminus-scratchpad.db.core :as db]
    [conman.core :as conman]
    [buddy.hashers :as hashers]
@@ -77,23 +80,22 @@
   (db/insert-user! {:status "active"
                     :email "mksybr@gmail.com"
                     :username "mksybr"
-                    :password "OceanicReterritorializationProcess"
+                    :password
+                    (hashers/derive "OceanicReterritorializationProcess")
                     :history (db/clj->jsonb-pgobj "{}")
                     :user_data (db/clj->jsonb-pgobj "{}")
                     :permissions (db/clj->jsonb-pgobj {:role :user})})
 
-  (db/login!)
-  {:email "z@z.com" :password "z@z.com"}
-
+  (jwt/unsign)
+  (jwt/sign #_{:claims {}}
+            (db/get-user-by-email {:email "4"}))
+  
+  (middleware/auth (fn [req]
+                     (resp/response "1")))
   
   (auth/basic-auth)
   (let [{:keys [email password]}
         (db/get-user-by-email {:email "z@z.com"})]
     (hashers/check password password)
     [email password])
-  {:email "1" :password ""}
-  )
-
-
-
-
+  {:email "1" :password ""})

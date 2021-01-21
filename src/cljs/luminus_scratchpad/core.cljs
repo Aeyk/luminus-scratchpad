@@ -15,6 +15,9 @@
     [ajax.core :refer [GET POST]])
   (:import goog.History))
 
+(defn navigate! [match _]
+  (rf/dispatch [:common/navigate match]))
+
 (defn nav-link [uri title page]
   [:a.navbar-item
    {:href   uri
@@ -93,7 +96,8 @@
                      @state)
                :handler
                (fn [ok]
-                 (swap! state assoc :flash [_ "OK" "User created"]))
+                 (swap! state assoc :flash
+                        ["" "OK" (str "Logged In As" (:username @state))]))
                :error-handler
                (fn [{:keys [status status-text fail response] :as err}]
                  (swap! state assoc :flash [status status-text (get-in response [:status :type])])
@@ -155,8 +159,8 @@
                                @state)
                          :handler
                          (fn [ok]
-                           (swap! state assoc :flash [_ "OK" "User created"])
-                           (navigate! :me))
+                           (swap! state assoc :flash ["" "OK" "User created"])
+                           (navigate! ok :me))
                          :error-handler
                          (fn [{:keys [status status-text fail response] :as err}]
                            (swap! state assoc :flash [status status-text (get-in response [:status :type])]))}))
@@ -176,9 +180,8 @@
      [navbar]
      [page]]))
 
-(defn navigate! [match _]
-  (rf/dispatch [:common/navigate match]))
-
+(defn user-page []
+  [:div "Hello"])
 
 (def router
   (reitit/router

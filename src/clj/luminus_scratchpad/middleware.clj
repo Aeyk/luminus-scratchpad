@@ -72,7 +72,7 @@
 (defn token-auth
   "Middleware used on routes requiring token authentication"
   [handler]
-  (wrap-authentication handler auth/token-backend))
+  (wrap-authentication handler [(auth/token-backend)]))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)

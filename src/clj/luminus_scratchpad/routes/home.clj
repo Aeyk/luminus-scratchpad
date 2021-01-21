@@ -12,8 +12,6 @@
    [buddy.auth.accessrules :as acl]
    [ring.util.http-response :as response]))
 
-
-
 (defn home-page [request]
   (layout/render request "home.html"))
 
@@ -21,18 +19,19 @@
 (defn bad-request [d] {:status 400 :body d})
 
 (defn login-handler [request]
-  (let [email (get-in request [:body :email])
-        password (get-in request [:body :password])
+  (let [email (get request :email)
+        password (get request :password)
         valid?   (hashers/check
                   password
                   (:password
                    (db/get-user-by-email {:email email})))]
-    (if valid?
-      (bad-request (str request) #_{:auth [email password]
-                                :message "wrong auth data"})
+    (ok (str [email password request]))
+    #_(if valid?
       (do
         (ok (jwt/create-token email))
-        (resp/redirect "/me")))))
+        (resp/redirect "/me"))
+      (bad-request {:auth [email password]
+                    :message "wrong auth data"}))))
 
 
 (defn home-routes []
@@ -42,13 +41,13 @@
    ["/" {:get home-page}]
 
    ["/me"
-    {:middleware [middleware/wrap-formats]
+    {:middleware []
      :get
      (fn [req]
        (if (:identity req)
          {:status 200 :body {:status (:identity req)} }
          {:status 200 :body {:status "ANON"} }))}]
-   
+
    ["/actions/login"
     {:post
      {

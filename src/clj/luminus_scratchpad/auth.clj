@@ -8,9 +8,9 @@
    [luminus-scratchpad.db.core :as db]))
 
 (defn basic-auth
-  [request {:keys [username password]}]
-  (let [user (db/get-user-by-username username)]
-    (if (and user (hashers/check password (:password user)))
+  [request {:keys [email password]}]
+  (let [user (db/get-user-by-email {:email email})]
+    (if (and user (hashers/verify password (:password user)))
       (-> user
           (dissoc :password)
           (assoc :token (jwt/create-token user)))
