@@ -95,6 +95,7 @@
                   :status      "active" 
                   :email    (:email user)
                   :user_data   {}
+                  :history {}
                   :password    "" #_(str (utils/gen-uuid))}
         user     (-> (merge defaults user)
                      (update :password hashers/encrypt))]
@@ -114,8 +115,9 @@
   ([user evt-name data]
    (let [defaults {:event-date (timestamp) :event evt-name}
          evt      (merge defaults data)
-         user     (update-in user [:history :events] conj evt)]
-     (update-user-history! user))))
+         user     (update-in user [:history :events] conj evt)]     
+     (update-user-history! (into user {:id (:id user)})))
+   user))
 
 (defn login! [user]
   (add-user-event! user "login"))

@@ -44,16 +44,20 @@
 
    ["/actions/login"
     {:post
-     {:handler
+     {
+      :middleware []
+      :handler
       #_login-handler
-      (fn [{:keys [identity] :as req}]
+      (fn [req]
         (try
           (do
             #_(db/login! identity)
             {:status 201
-             :clear (str req)
              :body
-             (json/encode (jwt/sign {:id (:id identity)}))})
+             {:identity  (:body-params req)
+              #_#_#_#_:clear (str req)
+              :jwt
+              (json/encode (jwt/sign {:id (:id identity)}))}})
           (catch clojure.lang.ExceptionInfo e
             {:status 401
              :body   {:status (ex-data e)}})))}}]
@@ -70,8 +74,8 @@
               (db/add-user! user)
               {:status 201
                :body
-               (json/encode (jwt/sign {:id (:id user)}))
-               #_{:status "OK"}})
+               {:identity user
+                :jwt (json/encode (jwt/sign {:id (:id user)}))}})
             (catch clojure.lang.ExceptionInfo e
               {:status 401
                :body   {:status (ex-data e)}}))))}}]
