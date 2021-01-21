@@ -27,10 +27,9 @@
                   (:password
                    (db/get-user-by-email {:email email})))]    
     (if valid?
-      (do
-        {:status 200
-         :body {:identity (jwt/create-token {:id email})}}
-        (resp/redirect "/me"))
+      #_{:status 302
+       :headers {"Location" "/me"}}
+      {:body {:identity (jwt/create-token {:id email})}}
       (bad-request {:auth [email password]
                     :message "Incorrect Email or Password."}))))
 

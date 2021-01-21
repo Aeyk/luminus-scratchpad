@@ -17,6 +17,7 @@
    [luminus-scratchpad.db.core :as db]
    [conman.core :as conman]
    [buddy.hashers :as hashers]
+   [ajax.core :refer [GET POST]]
    [luminus-migrations.core :as migrations]))
 
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
@@ -78,6 +79,8 @@
 
 (comment
   (mount/start)
+
+
   
   (db/insert-user! {:status "active"
                     :email "mksybr@gmail.com"
@@ -92,11 +95,30 @@
             (db/get-user-by-email {:email "mksybr@gmail.com"}))
 
 
+
+  @(GET
+   "http://localhost:3000/me")
+  {:headers
+     {identity
+      (jwt/create-token {:id "mksybr@gmail.com"})}
+     :handler (fn [ok] ok)}
+  
+  (GET
+   "/me"
+   {:headers
+    {identity
+     (jwt/create-token {:id "mksybr@gmail.com"})}
+    :handler (fn [ok]
+               ok)
+    :error-handler (fn [err]
+                     err)})
   
   (hashers/check "4"
                  (:password (db/get-user-by-email {:email "4"})))
   
-
+  (into (resp/redirect "/me")
+        {:body {:identity (jwt/create-token {:id "4"})}})
+  
   (auth/basic-auth {}
                    {:email "4" :password "4"})
   

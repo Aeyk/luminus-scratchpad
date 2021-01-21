@@ -27,6 +27,8 @@
     <logger name="org.apache.http" level="warn" />
     <logger name="org.xnio.nio" level="warn" />
     <logger name="com.zaxxer.hikari" level="warn" />
+    <logger name="io.undertow.websockets" level="warn" />
+
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
