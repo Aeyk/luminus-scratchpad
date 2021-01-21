@@ -12,9 +12,9 @@
    [luminus-scratchpad.config :refer [env]]
    [ring-ttl-session.core :refer [ttl-memory-store]]
    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+   [buddy.auth :refer [authenticated?]]
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
    [buddy.auth.accessrules :refer [restrict]]
-   [buddy.auth :refer [authenticated?]]
    [buddy.auth.backends.token :refer [jwe-backend]]
    [buddy.sign.jwt :refer [encrypt]]
    [buddy.core.nonce :refer [random-bytes]][buddy.sign.util :refer [to-timestamp]])
@@ -79,7 +79,7 @@
       wrap-formats
       wrap-flash
       (wrap-defaults
-        (-> site-defaults
+       (-> site-defaults
             (assoc-in [:security :anti-forgery] false)
             (assoc-in [:session :store] (ttl-memory-store (* 60 30)))))
       wrap-internal-error))

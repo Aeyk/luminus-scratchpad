@@ -70,9 +70,10 @@
 (comment
   (do
     (mount/stop)
-    (mount/start)
-    (reset-db)
-    (migrate)))
+    (mount/start))
+  
+  (reset-db)
+  (migrate))
 
 (comment
   (mount/start)
@@ -86,13 +87,17 @@
                     :user_data (db/clj->jsonb-pgobj "{}")
                     :permissions (db/clj->jsonb-pgobj {:role :user})})
 
-  (jwt/unsign)
   (jwt/sign #_{:claims {}}
-            (db/get-user-by-email {:email "4"}))
+            (db/get-user-by-email {:email "mksybr@gmail.com"}))
+
+
+  
+  (hashers/check "4"
+                 (:password (db/get-user-by-email {:email "4"})))
   
   (middleware/auth (fn [req]
                      (resp/response "1")))
-  
+
   (auth/basic-auth)
   (let [{:keys [email password]}
         (db/get-user-by-email {:email "z@z.com"})]

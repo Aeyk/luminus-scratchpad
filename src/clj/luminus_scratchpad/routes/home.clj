@@ -19,19 +19,22 @@
 (defn bad-request [d] {:status 400 :body d})
 
 (defn login-handler [request]
-  (let [email (get request :email)
-        password (get request :password)
+  (let [session(get-in request [:session])
+        email (get-in request [:params :email])
+        password (get-in request [:params :password])
         valid?   (hashers/check
                   password
                   (:password
                    (db/get-user-by-email {:email email})))]
-    (ok (str [email password request]))
-    #_(if valid?
+    (if valid?
       (do
-        (ok (jwt/create-token email))
+        {:status 200
+         :body (jwt/create-token {:id email})
+         :session  (merge session
+                          {:identity (jwt/create-token {:id email})})}
         (resp/redirect "/me"))
       (bad-request {:auth [email password]
-                    :message "wrong auth data"}))))
+                    :message "Incorrect Email or Password."}))))
 
 
 (defn home-routes []
@@ -41,12 +44,10 @@
    ["/" {:get home-page}]
 
    ["/me"
-    {:middleware []
+    {:middleware [middleware/basic-auth]
      :get
      (fn [req]
-       (if (:identity req)
-         {:status 200 :body {:status (:identity req)} }
-         {:status 200 :body {:status "ANON"} }))}]
+       {:status 200 :body {:status req} })}]
 
    ["/actions/login"
     {:post
@@ -76,4 +77,5 @@
    ["/docs" {:get (fn [_]
                     (-> (response/ok (-> "docs/docs.md" io/resource slurp))
                         (response/header "Content-Type" "text/plain; charset=utf-8")))}]])
+
 

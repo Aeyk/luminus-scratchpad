@@ -13,7 +13,8 @@
     [reitit.frontend.easy :as rfe]
     [clojure.string :as string]
     [ajax.core :refer [GET POST]])
-  (:import goog.History))
+  (:import goog.History
+           (goog.crypt Hmac Sha512)))
 
 (defn navigate! [match _]
   (rf/dispatch [:common/navigate match]))
