@@ -2,14 +2,18 @@
   "Userspace functions you can run by default in your local REPL."
   (:require
    [luminus-scratchpad.config :refer [env]]
-    [clojure.pprint]
-    [clojure.spec.alpha :as s]
-    [expound.alpha :as expound]
-    [mount.core :as mount]
-    [luminus-scratchpad.core :refer [start-app]]
-    [luminus-scratchpad.db.core :as db]
-    [conman.core :as conman]
-    [luminus-migrations.core :as migrations]))
+   [clojure.pprint]
+   [clojure.spec.alpha :as s]
+   [expound.alpha :as expound]
+   [mount.core :as mount]
+   [luminus-scratchpad.core :refer [start-app]]
+   [buddy.auth.backends :refer [jws]]
+   [luminus-scratchpad.auth :as auth]
+   [buddy.auth.backends.httpbasic :refer [http-basic-backend]]
+   [luminus-scratchpad.db.core :as db]
+   [conman.core :as conman]
+   [buddy.hashers :as hashers]
+   [luminus-migrations.core :as migrations]))
 
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
 
@@ -62,12 +66,14 @@
 
 (comment
   (do
+    (mount/stop)
     (mount/start)
+    (reset-db)
     (migrate)))
 
 (comment
   (mount/start)
-
+  
   (db/insert-user! {:status "active"
                     :email "mksybr@gmail.com"
                     :username "mksybr"
@@ -76,8 +82,17 @@
                     :user_data (db/clj->jsonb-pgobj "{}")
                     :permissions (db/clj->jsonb-pgobj {:role :user})})
 
-  (db/login!
-   (db/get-user-by-email {:email "z@z.com"})))
+  (db/login!)
+  {:email "z@z.com" :password "z@z.com"}
+
+  
+  (auth/basic-auth)
+  (let [{:keys [email password]}
+        (db/get-user-by-email {:email "z@z.com"})]
+    (hashers/check password password)
+    [email password])
+  {:email "1" :password ""}
+  )
 
 
 
