@@ -19,23 +19,20 @@
 (defn bad-request [d] {:status 400 :body d})
 
 (defn login-handler [request]
-  (let [session(get-in request [:session])
+  (let [session (get-in request [:session])
         email (get-in request [:params :email])
         password (get-in request [:params :password])
-        valid?   (hashers/check
+        valid?   (hashers/verify
                   password
                   (:password
-                   (db/get-user-by-email {:email email})))]
+                   (db/get-user-by-email {:email email})))]    
     (if valid?
       (do
         {:status 200
-         :body (jwt/create-token {:id email})
-         :session  (merge session
-                          {:identity (jwt/create-token {:id email})})}
+         :body {:identity (jwt/create-token {:id email})}}
         (resp/redirect "/me"))
       (bad-request {:auth [email password]
                     :message "Incorrect Email or Password."}))))
-
 
 (defn home-routes []
   [""
@@ -44,7 +41,8 @@
    ["/" {:get home-page}]
 
    ["/me"
-    {:middleware [middleware/basic-auth]
+    {:middleware [(middleware/basic-auth {})
+                  middleware/auth]
      :get
      (fn [req]
        {:status 200 :body {:status req} })}]
@@ -52,7 +50,8 @@
    ["/actions/login"
     {:post
      {
-      :middleware []
+      :middleware [#_#_(middleware/basic-auth {})
+                   middleware/auth]
       :handler
       login-handler}}]
 

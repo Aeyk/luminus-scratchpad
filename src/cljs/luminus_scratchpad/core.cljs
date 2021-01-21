@@ -93,7 +93,8 @@
                {"Accept" "application/transit+json"
                 "x-csrf-token" js/csrfToken}
                :params
-               (into {"x-csrf-token" js/csrfToken}
+               (into {"x-csrf-token" js/csrfToken
+                      "identity" (:identity @state)}
                      @state)
                :handler
                (fn [ok]
@@ -166,11 +167,6 @@
                          (fn [{:keys [status status-text fail response] :as err}]
                            (swap! state assoc :flash [status status-text (get-in response [:status :type])]))}))
            :default-value "Register an account"}]]]])))
-
-
-
-
-
 
 
 (defn me-page [])

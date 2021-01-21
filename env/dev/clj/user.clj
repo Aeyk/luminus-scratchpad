@@ -8,6 +8,7 @@
    [mount.core :as mount]
    [luminus-scratchpad.core :refer [start-app]]
    [ring.util.response :as resp]
+   [ring.util.request :as request]
    [buddy.auth.backends :refer [jws]]
    [luminus-scratchpad.auth :as auth]
    [buddy.auth.backends.httpbasic :refer [http-basic-backend]]
@@ -95,10 +96,10 @@
   (hashers/check "4"
                  (:password (db/get-user-by-email {:email "4"})))
   
-  (middleware/auth (fn [req]
-                     (resp/response "1")))
 
-  (auth/basic-auth)
+  (auth/basic-auth {}
+                   {:email "4" :password "4"})
+  
   (let [{:keys [email password]}
         (db/get-user-by-email {:email "z@z.com"})]
     (hashers/check password password)
