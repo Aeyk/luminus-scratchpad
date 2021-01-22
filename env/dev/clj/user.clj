@@ -100,6 +100,8 @@
     :from_user_id
     (:id (db/get-user-by-email {:email "mksybr@gmail.com"}))})
 
+  (db/get-most-recent-messages {:count 1}) 
+  
   @(GET
     "http://localhost:3000/me"
     {:identity
