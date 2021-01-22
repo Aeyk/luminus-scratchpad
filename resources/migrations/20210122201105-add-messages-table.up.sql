@@ -1,0 +1,9 @@
+CREATE TABLE messages
+  (
+    id NOT NULL DEFAULT PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    from_user_id int NOT NULL,
+
+    FOREIGN KEY (from_user_id) REFERENCES users(id) ON DELETE CASCADE,
+
+  );

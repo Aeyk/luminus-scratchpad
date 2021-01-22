@@ -137,4 +137,8 @@
         (db/get-user-by-email "4")]
     (hashers/check password password)
     [email password])
-  {:email "1" :password ""})
+  {:email "1" :password ""}
+
+
+  (create-migration "add-messages-table")
+  )
