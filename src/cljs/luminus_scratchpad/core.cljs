@@ -32,6 +32,8 @@
                 :view #'views/about-page}]
      ["/me" {:name :me
              :view #'views/me-page}]
+     ["/chat" {:name :chat
+               :view #'views/chat-page}]
      ["/user" {:name :user
                :view #'views/user-page}]]))
 
@@ -45,6 +47,8 @@
 ;; Initialize app
 (defn ^:dev/after-load mount-components []
   (rf/clear-subscription-cache!)
+  (if (js/localStorage.getItem "scratch-client-name")
+    (reset! views/current-user (js/localStorage.getItem "scratch-client-name")))
   (rdom/render [#'views/page] (.getElementById js/document "app")))
 
 (defn init! []
