@@ -47,6 +47,7 @@
                  [selmer "1.12.31"]
                  [thheller/shadow-cljs "2.11.5" :scope "provided"]
                  [cljs-http "0.1.46"]
+                 [com.draines/postal "2.0.4"]
                  ]
 
   :min-lein-version "2.0.0"

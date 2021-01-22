@@ -6,7 +6,7 @@
             [ajax.core :refer [GET POST]]))
 
 
-(def current-user (r/atom nil))
+(defonce current-user (r/atom nil))
 
 (defn logout-handler []
   (reset! current-user nil)
@@ -136,9 +136,9 @@
                        :password_confirmation ""
                        :flash []})]
     (fn []
-      (if @current-user
-        [:div (str "Hello " @current-user)]
-        [:section.section>div.container>div.content
+      [:section.section>div.container>div.content
+       (if @current-user
+         [:div (str "Hello " @current-user)]
          [:form.section
           {:method "POST"
            :action "/actions/register"
@@ -201,7 +201,7 @@
                            (fn [{:keys [status status-text fail response] :as err}]
                              (swap! state assoc :flash [status status-text (get-in response [:status :type])])
                              )}))
-             :default-value "Register an account"}]]]]))))
+             :default-value "Register an account"}]]])])))
 
 
 (defn me-page []
