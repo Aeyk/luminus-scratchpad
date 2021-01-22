@@ -100,7 +100,9 @@
                  (swap! state assoc "x-csrf-token" js/csrfToken)
                  (swap! state assoc :flash
                         ["OK" (str "Logged In As " (:email @state))])
-                 (js/localStorage.setItem "scratch-client-key" (:identity ok))
+
+                 (js/console.log ok)
+                 (js/localStorage.setItem "scratch-client-key" (:token ok))
                  (js/console.log
                   (js/localStorage.getItem "scratch-client-key")))
                :error-handler
@@ -113,7 +115,7 @@
                               "x-csrf-token" js/csrfToken
                               "identity" (js/localStorage.getItem "scratch-client-key")
                               "Authorization"
-                              (str "Bearer " (js/localStorage.getItem "scratch-client-key"))}
+                              (str "Token " (js/localStorage.getItem "scratch-client-key"))}
                     :handler (fn [ok] ok)} )
              )
            :default-value "Sign in"}]]]])))
