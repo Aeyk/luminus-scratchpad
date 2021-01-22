@@ -6,11 +6,26 @@
             [ajax.core :refer [GET POST]]))
 
 
+(def current-user (r/atom nil))
+
+(defn logout-handler []
+  (reset! current-user nil)
+  (js/localStorage.removeItem "scratch-client-key")
+  (js/localStorage.removeItem "scratch-client-name"))
+
+(defn logged-in? []
+  (not (nil? @current-user)))
+
 (defn nav-link [uri title page]
   [:a.navbar-item
    {:href   uri
     :class (when (= page @(rf/subscribe [:common/page])) :is-active)}
    title])
+
+(defn sign-up-login []
+  [:<>
+   [nav-link "#/login" "Login" :login]
+   [nav-link "#/signup" "Signup" :signup]])
 
 (defn navbar []
   (r/with-let [expanded? (r/atom false)]
@@ -27,8 +42,11 @@
       [:div.navbar-start
        [nav-link "#/" "Home" :home]
        [nav-link "#/about" "About" :about]
-       [nav-link "#/login" "Login" :login]
-       [nav-link "#/signup" "Signup" :signup]]]]))
+       (if @current-user
+         [:a.navbar-item
+          {:on-click logout-handler}
+          (str "Sign Out of " @current-user)]
+         [sign-up-login])]]]))
 
 
 
@@ -90,10 +108,9 @@
                  (swap! state assoc :flash
                         ["OK" (str "Logged In As " (:email @state))])
 
-                 (js/console.log ok)
                  (js/localStorage.setItem "scratch-client-key" (:token ok))
-                 (js/console.log
-                  (js/localStorage.getItem "scratch-client-key")))
+                 (js/localStorage.setItem "scratch-client-name" (:identity ok))
+                 (reset! current-user (js/localStorage.getItem "scratch-client-name")))
                :error-handler
                (fn [{:keys [status status-text fail response] :as err}]
                  (swap! state assoc :flash [status status-text (get-in response [:status :type])])
@@ -165,6 +182,7 @@
                          :handler
                          (fn [ok]
                            (js/localStorage.setItem "scratch-client-key" (:token ok))
+                           (js/localStorage.setItem "scratch-client-name" (:identity ok))
                            (swap! state assoc :flash ["" "OK" "User created"])
                            (GET "/me"
                                 {:headers {#_#_"Accept" "application/transit+json"

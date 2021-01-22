@@ -33,7 +33,7 @@
                             (java.time.Instant/now) 3600)
                       #_(time/plus (time/now) (time/seconds 3600))}
               token (jwt/sign claims)]
-          (ok {:identity (keyword email)
+          (ok {:identity email
                :token token}))
         #_{:body {:identity (jwt/create-token {:id email})}})
       (bad-request {:auth [email password]
