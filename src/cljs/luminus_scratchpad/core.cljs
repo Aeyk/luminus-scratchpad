@@ -111,12 +111,12 @@
                  (js/console.log @state))})
              ;; * Check Auth
              (GET "/me"
-                   {:headers {#_#_"Accept" "application/transit+json"
-                              "x-csrf-token" js/csrfToken
-                              "identity" (js/localStorage.getItem "scratch-client-key")
-                              "Authorization"
-                              (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-                    :handler (fn [ok] ok)} )
+                  {:headers {#_#_"Accept" "application/transit+json"
+                             "x-csrf-token" js/csrfToken
+                             "identity" (js/localStorage.getItem "scratch-client-key")
+                             "Authorization"
+                             (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+                   :handler (fn [ok] ok)} )
              )
            :default-value "Sign in"}]]]])))
 
@@ -170,20 +170,31 @@
                         "/actions/register"
                         {:headers
                          {"Accept" "application/transit+json"}
-                         :params
-                         (into {"x-csrf-token" js/csrfToken}
+                         :params (select-keys @state [:email :username :password])
+                        #_(into {#_#_"x-csrf-token" js/csrfToken}
                                @state)
                          :handler
                          (fn [ok]
+                           (js/localStorage.setItem "scratch-client-key" (:token ok))
                            (swap! state assoc :flash ["" "OK" "User created"])
-                           (navigate! ok :me))
+                           (GET "/me"
+                                {:headers {#_#_"Accept" "application/transit+json"
+                                           "x-csrf-token" js/csrfToken
+                                           "identity" (js/localStorage.getItem "scratch-client-key")
+                                           "Authorization"
+                                           (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+                                 :handler (fn [ok] ok)} ))
                          :error-handler
                          (fn [{:keys [status status-text fail response] :as err}]
-                           (swap! state assoc :flash [status status-text (get-in response [:status :type])]))}))
+                           (swap! state assoc :flash [status status-text (get-in response [:status :type])])
+                           )}))
            :default-value "Register an account"}]]]])))
 
 
-(defn me-page [])
+(defn me-page []
+  [:div
+   (str "Hello User")]
+  )
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
@@ -205,6 +216,8 @@
                 :view login-page}]
      ["/about" {:name :about
                 :view #'about-page}]
+     ["/me" {:name :me
+             :view #'me-page}]
      ["/user" {:name :user
                 :view #'user-page}]]))
 

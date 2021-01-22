@@ -88,7 +88,8 @@
           (try
             (do
               (db/add-user! user)
-              {:status 200
+              (login-handler req)
+              #_{:status 200
                :params {"identity"
                         (json/encode (jwt/sign {:id (:id user)}))}
                :headers {"identity"
