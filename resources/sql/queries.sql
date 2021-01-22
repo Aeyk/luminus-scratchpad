@@ -115,8 +115,8 @@ INSERT INTO messages (
 
 -- :name get-most-recent-messages
 -- :command :query
--- :result :raw
--- :doc Send a new message from a user
+-- :result :many
+-- :doc Get nth most recent messages
 SELECT *
   FROM messages
  ORDER BY created_at DESC
