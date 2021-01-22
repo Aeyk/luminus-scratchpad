@@ -98,3 +98,20 @@ SELECT
 UPDATE users
    SET    history = :history
  WHERE  id = :id ::uuid;
+
+
+-- :name insert-message!
+-- :command :insert
+-- :result :raw
+-- :doc Send a new message from a user
+INSERT INTO messages (
+  from_user_id,
+  content
+) VALUES (
+  :from_user_id
+  :content
+);
+
+
+
+
