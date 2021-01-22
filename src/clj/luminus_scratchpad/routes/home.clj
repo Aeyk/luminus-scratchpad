@@ -83,11 +83,10 @@
      :post
      {:handler
       (fn [request]
-
         (ok (try
-              (str #_db/insert-message!
-               {:content (-> request :body-params :message)
-                :from_user_id (str (:id (db/get-user-by-email {:email (:user (:identity request))})))}
+              (db/insert-message!
+                   {:content (-> request :body-params :message)
+                    :from_user_id (:id (db/get-user-by-email {:email "mksybr@gmail.com"}))}
                #_(db/insert-message! (:body-params request)))
               (catch Exception e
                 (str (.getCause e))))))}}]
