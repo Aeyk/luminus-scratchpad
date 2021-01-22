@@ -227,7 +227,9 @@
                  {:headers {"Accept" "application/transit+json"
                             "Authorization"
                             (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-                  :handler (fn [ok] (js/console.log ok))} )
+                  :params {:message @message}
+                  :handler (fn [ok]
+                             (js/console.log ok))} )
             #_(POST
              "/actions/send"
              {:headers

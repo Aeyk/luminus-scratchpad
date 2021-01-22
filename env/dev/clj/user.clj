@@ -99,7 +99,9 @@
   (jwt/sign #_{:claims {}}
             (db/get-user-by-email {:email "mksybr@gmail.com"}))
 
-
+  (db/insert-message!
+   {:content "asdfasdf"
+    :from_user_id "b5e589e2-5cef-11eb-a42c-6c8814a333c0"})
 
   @(GET
     "http://localhost:3000/me"
