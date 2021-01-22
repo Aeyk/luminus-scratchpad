@@ -43,9 +43,11 @@
        [nav-link "#/" "Home" :home]
        [nav-link "#/about" "About" :about]
        (if @current-user
-         [:a.navbar-item
-          {:on-click logout-handler}
-          (str "Sign Out of " @current-user)]
+         [:<>
+          [nav-link "#/chat" "Chat" :chat]
+          [:a.navbar-item
+           {:on-click logout-handler}
+           (str "Sign Out of " @current-user)]]
          [sign-up-login])]]]))
 
 
@@ -190,13 +192,7 @@
                              (reset! current-user (js/localStorage.getItem "scratch-client-name"))
                              
                              (swap! state assoc :flash ["" "OK" "User created"])
-                             (GET "/me"
-                                  {:headers {#_#_"Accept" "application/transit+json"
-                                             "x-csrf-token" js/csrfToken
-                                             "identity" (js/localStorage.getItem "scratch-client-key")
-                                             "Authorization"
-                                             (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-                                   :handler (fn [ok] ok)} ))
+                             )
                            :error-handler
                            (fn [{:keys [status status-text fail response] :as err}]
                              (swap! state assoc :flash [status status-text (get-in response [:status :type])])
@@ -207,6 +203,53 @@
   [:section.section>div.container>div.content
    (str "Hello User")]
   )
+
+(defn chat-page []
+  (let [message (r/atom "")]
+    (fn []
+      [:section.section>div.container>div.content
+       [:button.button {:on-click (fn [e] 
+                                    (@GET "/me"
+                                         {:headers {#_#_"Accept" "application/transit+json"
+                                                    "x-csrf-token" js/csrfToken
+                                                    "identity" (js/localStorage.getItem "scratch-client-key")
+                                                    "Authorization"
+                                                    (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+                                          :handler (fn [ok] ok)} ))} "TEST ME"]
+       [:div #_{:action "/actions/send"}
+        [:input.input {:default-value @message
+                       :on-change #(reset! message (-> % .-target .-value))}]
+        [:button.button
+         {:on-click
+          (fn [e]
+            (e.preventDefault)
+            (POST "/actions/send"
+                 {:headers {"Accept" "application/transit+json"
+                            "Authorization"
+                            (str "Token " (js/localStorage.getItem "scratch-client-key"))
+                            "identity" (js/localStorage.getItem "scratch-client-key")}
+                  :params
+                  {:message @message}
+                  :handler (fn [ok] (js/console.log ok))
+                  :error-handler
+                  (fn [{:keys [status status-text fail response] :as err}]
+                    (js/console.log err))
+                  }
+                 )
+            #_(POST
+             "/actions/send"
+             {:headers
+              {"Accept" "application/transit+json"
+               "Authorization"
+               (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+              :params
+              {"message" @message}
+              :handler
+              (fn [ok] ok)
+              :error-handler
+              (fn [{:keys [status status-text fail response] :as err}]
+                (js/console.log err))}))}
+         "SEND!"]]])))
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]

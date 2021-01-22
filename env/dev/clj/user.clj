@@ -97,7 +97,7 @@
                     :permissions (db/clj->jsonb-pgobj {:role :user})})
 
   (jwt/sign #_{:claims {}}
-            (db/get-user-by-email {:email "mksybr@gmail.com"}))
+            (db/get-user-by-email {:email "4"}))
 
 
 

@@ -51,10 +51,10 @@
     {:middleware [middleware/wrap-auth]
      :get
      (fn [request]
-       (if-not (auth/authenticated? request)
-         (auth/throw-unauthorized)
-         (ok {:status "Logged" :message (str "hello logged user "
-                                             (:identity request))})))}]
+       #_(if-not (auth/authenticated? request)
+         (auth/throw-unauthorized))
+       (ok {:status "Logged" :message (str "hello logged user "
+                                           (:identity request))}))}]
    ;; * Get Authentication Token for [email password]
    ["/actions/login"
     {:post
@@ -77,6 +77,17 @@
             (catch clojure.lang.ExceptionInfo e
               {:status 401
                :body   {:status (ex-data e)}}))))}}]
+;; * Send message
+   ["/actions/send"
+    {:middleware [middleware/wrap-auth]
+     :post
+     {:handler
+      (fn [request]
+        (if-not (auth/authenticated? request)
+          (auth/throw-unauthorized)
+          (ok {:status "Logged" :message
+               (str request)})))}}]
+   
 ;; * Come with Luminus, just docs
    ["/docs" {:get (fn [_]
                     (-> (response/ok (-> "docs/docs.md" io/resource slurp))
