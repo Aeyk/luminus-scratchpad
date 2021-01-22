@@ -203,9 +203,8 @@
                              )}))
              :default-value "Register an account"}]]])])))
 
-
 (defn me-page []
-  [:div
+  [:section.section>div.container>div.content
    (str "Hello User")]
   )
 
