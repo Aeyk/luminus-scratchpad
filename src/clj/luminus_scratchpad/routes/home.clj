@@ -83,10 +83,10 @@
      :post
      {:handler
       (fn [request]
-        (if-not (auth/authenticated? request)
-          (auth/throw-unauthorized)
-          (ok {:status "Logged" :message
-               (str request)})))}}]
+        (ok (str #_db/insert-message!
+                 {:content (-> request :params :message)
+                  :from_user_id (str (:id (db/get-user-by-email {:email (:user (:identity request))})))}
+                 #_(db/insert-message! (:body-params request)))))}}]
    
 ;; * Come with Luminus, just docs
    ["/docs" {:get (fn [_]

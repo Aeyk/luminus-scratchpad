@@ -211,13 +211,12 @@
    (str "Hello User")]
   )
 
-
 (defn chat-page []
   (let [message (r/atom "")]
     (fn []
       [:section.section>div.container>div.content
        [:button.button {:on-click (fn [e] 
-                                    (@GET "/me"
+                                   (GET "/me"
                                          {:headers {#_#_"Accept" "application/transit+json"
                                                     "x-csrf-token" js/csrfToken
                                                     "identity" (js/localStorage.getItem "scratch-client-key")
