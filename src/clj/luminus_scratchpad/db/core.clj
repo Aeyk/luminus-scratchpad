@@ -77,10 +77,10 @@
         (.setObject stmt idx (clj->jsonb-pgobj v))))))
 
 (defn username-exists? [user]
-  (some? (get-user-by-username {:username user})))
+  (some? (get-user-by-username user)))
 
 (defn email-exists? [user]
-  (some? (get-user-by-email {:email user})))
+  (some? (get-user-by-email user)))
 
 (defn add-user! [user]
   (when (username-exists? user)

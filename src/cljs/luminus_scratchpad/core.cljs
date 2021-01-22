@@ -87,23 +87,35 @@
           {:on-click
            (fn [e]
              (e.preventDefault)
+             ;; * Login
              (POST
               "/actions/login"
               {:headers
                {"Accept" "application/transit+json"
                 "x-csrf-token" js/csrfToken}
                :params
-               (into {"x-csrf-token" js/csrfToken
-                      "identity" (:identity @state)}
-                     @state)
+               @state
                :handler
                (fn [ok]
+                 (swap! state assoc "x-csrf-token" js/csrfToken)
                  (swap! state assoc :flash
-                        ["" "OK" (str "Logged In As" (:username @state))]))
+                        ["OK" (str "Logged In As " (:email @state))])
+                 (js/localStorage.setItem "scratch-client-key" (:identity ok))
+                 (js/console.log
+                  (js/localStorage.getItem "scratch-client-key")))
                :error-handler
                (fn [{:keys [status status-text fail response] :as err}]
                  (swap! state assoc :flash [status status-text (get-in response [:status :type])])
-                 (js/console.log @state))}))
+                 (js/console.log @state))})
+             ;; * Check Auth
+             (GET "/me"
+                   {:headers {#_#_"Accept" "application/transit+json"
+                              "x-csrf-token" js/csrfToken
+                              "identity" (js/localStorage.getItem "scratch-client-key")
+                              "Authorization"
+                              (str "Bearer " (js/localStorage.getItem "scratch-client-key"))}
+                    :handler (fn [ok] ok)} )
+             )
            :default-value "Sign in"}]]]])))
 
 

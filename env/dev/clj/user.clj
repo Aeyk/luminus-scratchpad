@@ -123,7 +123,7 @@
                    {:email "4" :password "4"})
   
   (let [{:keys [email password]}
-        (db/get-user-by-email {:email "z@z.com"})]
+        (db/get-user-by-email "4")]
     (hashers/check password password)
     [email password])
   {:email "1" :password ""})

@@ -10,6 +10,7 @@
    [buddy.hashers :as hashers]
    [buddy.auth :as auth]
    [buddy.auth.accessrules :as acl]
+   [ajax.core :refer [GET POST]]
    [ring.util.http-response :as response]))
 
 (defn home-page [request]
@@ -22,7 +23,7 @@
   (let [session (get-in request [:session])
         email (get-in request [:params :email])
         password (get-in request [:params :password])
-        valid?   (hashers/verify
+        valid?   (hashers/check
                   password
                   (:password
                    (db/get-user-by-email {:email email})))]    
@@ -40,11 +41,22 @@
    ["/" {:get home-page}]
 
    ["/me"
-    {:middleware [(middleware/basic-auth {})
-                  middleware/auth]
+    {:middleware [middleware/token-auth]
      :get
      (fn [req]
-       {:status 200 :body {:status req} })}]
+       {:status 200
+        :headers
+        {#_#_"Authorization"
+         (str "Bearer "
+              (first
+               (vals (select-keys (:headers req) ["identity"]))))}
+        :body {:identity
+               (get (:query-params req) "identity")}
+        #_{"Authorization"
+                   (str "Bearer "
+                        (first
+                         (vals (select-keys (:headers req) ["identity"]))))}
+        #_(select-keys (:headers req) ["identity" "x-csrf-token"])})}]
 
    ["/actions/login"
     {:post
@@ -64,11 +76,22 @@
           (try
             (do
               (db/add-user! user)
-              {:status 201
+              {:status 200
+               :params {"identity"
+                        (json/encode (jwt/sign {:id (:id user)}))}
+               :headers {"identity"
+                         (json/encode (jwt/sign {:id (:id user)}))}
+
                :body
-               {#_#_:identity user
-                :identity (json/encode (jwt/sign {:id (:id user)}))
-                :jwt (json/encode (jwt/sign {:id (:id user)}))}})
+               {:token
+                (json/encode (jwt/sign {:id (:id user)}))
+                :test
+                (str @(GET
+                      "http://localhost:3000/me"
+                      {:handler (fn [ok] ok)
+                       :headers
+                       {"identity"
+                        (json/encode (jwt/sign {:id (:id user)}))}}))}})
             (catch clojure.lang.ExceptionInfo e
               {:status 401
                :body   {:status (ex-data e)}}))))}}]
