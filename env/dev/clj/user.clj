@@ -73,20 +73,17 @@
   (do
     (mount/stop)
     (mount/start))
-  
-  (reset-db)
-  (migrate))
+
+
+  (do 
+    (reset-db)
+    (migrate))
+
+  )
 
 (comment
   (mount/start)
 
-
-  
-
-  
-  
-
-  
   (db/insert-user! {:status "active"
                     :email "mksybr@gmail.com"
                     :username "mksybr"
@@ -96,10 +93,12 @@
                     :user_data (db/clj->jsonb-pgobj "{}")
                     :permissions (db/clj->jsonb-pgobj {:role :user})})
 
-  (jwt/sign #_{:claims {}}
-            (db/get-user-by-email {:email "4"}))
+  (jwt/sign #_{:claims {}})
 
-
+  (db/insert-message!
+   {:content "asdfasdf"
+    :from_user_id
+    (:id (db/get-user-by-email {:email "mksybr@gmail.com"}))})
 
   @(GET
     "http://localhost:3000/me"
@@ -137,4 +136,8 @@
         (db/get-user-by-email "4")]
     (hashers/check password password)
     [email password])
-  {:email "1" :password ""})
+  {:email "1" :password ""}
+
+
+  (create-migration "add-messages-table")
+  )

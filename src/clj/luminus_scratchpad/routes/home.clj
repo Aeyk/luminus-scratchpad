@@ -83,10 +83,14 @@
      :post
      {:handler
       (fn [request]
-        (ok (str #_db/insert-message!
-                 {:content (-> request :params :message)
-                  :from_user_id (str (:id (db/get-user-by-email {:email (:user (:identity request))})))}
-                 #_(db/insert-message! (:body-params request)))))}}]
+
+        (ok (try
+              (str #_db/insert-message!
+               {:content (-> request :body-params :message)
+                :from_user_id (str (:id (db/get-user-by-email {:email (:user (:identity request))})))}
+               #_(db/insert-message! (:body-params request)))
+              (catch Exception e
+                (str (.getCause e))))))}}]
    
 ;; * Come with Luminus, just docs
    ["/docs" {:get (fn [_]

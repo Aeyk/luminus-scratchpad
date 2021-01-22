@@ -44,7 +44,6 @@
        [nav-link "#/" "Home" :home]
        [nav-link "#/about" "About" :about]
        (if @current-user
-
          [:<>
           [nav-link "#/chat" "Chat" :chat]
           [:a.navbar-item
@@ -207,6 +206,7 @@
              :default-value "Register an account"}]]])])))
 
 (defn me-page []
+
   [:section.section>div.container>div.content
    (str "Hello User")]
   )
@@ -215,14 +215,6 @@
   (let [message (r/atom "")]
     (fn []
       [:section.section>div.container>div.content
-       [:button.button {:on-click (fn [e] 
-                                   (GET "/me"
-                                         {:headers {#_#_"Accept" "application/transit+json"
-                                                    "x-csrf-token" js/csrfToken
-                                                    "identity" (js/localStorage.getItem "scratch-client-key")
-                                                    "Authorization"
-                                                    (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-                                          :handler (fn [ok] ok)} ))} "TEST ME"]
        [:div #_{:action "/actions/send"}
         [:input.input {:default-value @message
                        :on-change #(reset! message (-> % .-target .-value))}]
@@ -233,16 +225,10 @@
             (POST "/actions/send"
                  {:headers {"Accept" "application/transit+json"
                             "Authorization"
-                            (str "Token " (js/localStorage.getItem "scratch-client-key"))
-                            "identity" (js/localStorage.getItem "scratch-client-key")}
-                  :params
-                  {:message @message}
-                  :handler (fn [ok] (js/console.log ok))
-                  :error-handler
-                  (fn [{:keys [status status-text fail response] :as err}]
-                    (js/console.log err))
-                  }
-                 )
+                            (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+                  :params {:message @message}
+                  :handler (fn [ok]
+                             (js/console.log ok))} )
             #_(POST
              "/actions/send"
              {:headers
@@ -258,3 +244,8 @@
                 (js/console.log err))}))}
          "SEND!"]]])))
 
+(defn page []
+  (if-let [page @(rf/subscribe [:common/page])]
+    [:div
+     [navbar]
+     [page]]))

@@ -4,6 +4,15 @@
     [cprop.source :as source]
     [mount.core :refer [args defstate]]))
 
+
+(defstate env
+  :start
+  (load-config
+    :merge
+    [(args)
+     (source/from-system-props)
+     (source/from-env)]))
+
 (def default-config
   {
    #_#_#_#_#_#_#_#_#_#_#_#_#_
@@ -19,11 +28,3 @@
     :user (:smtp-user env)
     :pass (:smtp-pass env)
     :from (:smtp-from env)}})
-
-(defstate env
-  :start
-  (load-config
-    :merge
-    [(args)
-     (source/from-system-props)
-     (source/from-env)]))
