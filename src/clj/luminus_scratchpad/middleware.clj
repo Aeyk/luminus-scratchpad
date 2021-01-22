@@ -17,7 +17,8 @@
    [buddy.auth.accessrules :refer [restrict]]
    [buddy.auth.backends.token :refer [jwe-backend]]
    [buddy.sign.jwt :refer [encrypt]]
-   [buddy.core.nonce :refer [random-bytes]][buddy.sign.util :refer [to-timestamp]])
+   [buddy.core.nonce :refer [random-bytes]]
+   [buddy.sign.util :refer [to-timestamp]])
   (:import
    [java.util Calendar Date]
    ))
@@ -56,18 +57,23 @@
   (restrict handler {:handler authenticated?
                      :on-error on-error}))
 
-(defn auth
-  "Middleware used in routes that require authentication. If request is not
-   authenticated a 401 not authorized response will be returned"
-  [handler]
-  (fn [request]
-    (if (authenticated? request)
-      (handler request)
-      (resp/unauthorized {:error "Not authorized"}))))
+(defn wrap-auth [handler]
+  (as-> handler $
+    (wrap-authorization $ auth/token-backend)
+    (wrap-authentication $ auth/token-backend)))
 
-(defn basic-auth [_]
-  (fn [handler]
-    (wrap-authentication handler (auth/basic-auth-backend _))))
+;; (defn auth
+;;   "Middleware used in routes that require authentication. If request is not
+;;    authenticated a 401 not authorized response will be returned"
+;;   [handler]
+;;   (fn [request]
+;;     (if (authenticated? request)
+;;       (handler request)
+;;       (resp/unauthorized {:error "Not authorized"}))))
+
+;; (defn basic-auth [_]
+;;   (fn [handler]
+;;     (wrap-authentication handler (auth/basic-auth-backend _))))
 
 (def allow-methods "GET, PUT, PATCH, POST, DELETE, OPTIONS")
 (def allow-headers "Authorization, Content-Type")
@@ -86,10 +92,10 @@
     (let [response (handler request)]
       (add-cors-headers response))))
 
-(defn token-auth
-  "Middleware used on routes requiring token authentication"
-  [handler]
-  (wrap-authentication handler auth/token-backend))
+;; (defn token-auth
+;;   "Middleware used on routes requiring token authentication"
+;;   [handler]
+;;   (wrap-authentication handler auth/token-backend))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)

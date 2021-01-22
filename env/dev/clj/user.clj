@@ -82,6 +82,11 @@
 
 
   
+
+  
+  
+
+  
   (db/insert-user! {:status "active"
                     :email "mksybr@gmail.com"
                     :username "mksybr"
@@ -97,21 +102,27 @@
 
 
   @(GET
-   "http://localhost:3000/me")
+    "http://localhost:3000/me"
+    {:identity
+     (get-in (luminus-scratchpad.routes.home/login-handler {:body-params {:email "z" :password "z"}}) [:body :token])
+     })
+
+  
   {:headers
      {identity
       (jwt/create-token {:id "mksybr@gmail.com"})}
-     :handler (fn [ok] ok)}
+     :handler (fn [ok] ok)}q
   
   (GET
    "/me"
-   {:headers
-    {identity
-     (jwt/create-token {:id "mksybr@gmail.com"})}
-    :handler (fn [ok]
-               ok)
-    :error-handler (fn [err]
-                     err)})
+   
+   :headers
+   {identity
+    (jwt/create-token {:id "mksybr@gmail.com"})}
+   :handler (fn [ok]
+                ok)
+   :error-handler (fn [err]
+                      err))
   
   (hashers/check "4"
                  (:password (db/get-user-by-email {:email "4"})))

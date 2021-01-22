@@ -20,37 +20,50 @@
 (defn bad-request [d] {:status 400 :body d})
 
 (defn login-handler [request]
-  (let [session (get-in request [:session])
-        email (get-in request [:params :email])
-        password (get-in request [:params :password])
+  (let [email (get-in request [:body-params :email])
+        password (get-in request [:body-params :password])
         valid?   (hashers/check
                   password
                   (:password
-                   (db/get-user-by-email {:email email})))]    
+                   (db/get-user-by-email {:email email})))]
     (if valid?
-      #_{:status 302
-       :headers {"Location" "/me"}}
-      {:body {:identity (jwt/create-token {:id email})}}
+      (do
+        (let [claims {:user (keyword email)
+                      :exp (.plusSeconds
+                            (java.time.Instant/now) 3600)
+                      #_(time/plus (time/now) (time/seconds 3600))}
+              token (jwt/sign claims)]
+          (ok {:identity (keyword email)
+               :token token}))
+        #_{:body {:identity (jwt/create-token {:id email})}})
       (bad-request {:auth [email password]
                     :message "Incorrect Email or Password."}))))
 
 (defn home-routes []
   [""
-   {:middleware [middleware/wrap-csrf
-                 middleware/wrap-formats]}
-   ["/" {:get home-page}]
+   {}
+   ["/" {:middleware [middleware/wrap-csrf
+                      middleware/wrap-formats]
+         :get home-page}]
 
    ["/me"
-    {:middleware [middleware/token-auth]
+    {:middleware [middleware/wrap-auth]
      :get
-     (fn [req]
+     (fn [request]
+       (if-not (auth/authenticated? request)
+         (auth/throw-unauthorized)
+         (ok {:status "Logged" :message (str "hello logged user "
+                                             (:identity request))}))
+#_
        {:status 200
         :headers
         {#_#_"Authorization"
          (str "Bearer "
               (first
                (vals (select-keys (:headers req) ["identity"]))))}
-        :body {:identity
+        :body
+        (str req)
+        #_{:identity
                (get (:query-params req) "identity")}
         #_{"Authorization"
                    (str "Bearer "
@@ -61,8 +74,7 @@
    ["/actions/login"
     {:post
      {
-      :middleware [#_#_(middleware/basic-auth {})
-                   middleware/auth]
+      :middleware []
       :handler
       login-handler}}]
 
