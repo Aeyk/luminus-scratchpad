@@ -8,6 +8,7 @@
 
 (defonce current-user (r/atom nil))
 
+
 (defn logout-handler []
   (reset! current-user nil)
   (js/localStorage.removeItem "scratch-client-key")
@@ -43,6 +44,7 @@
        [nav-link "#/" "Home" :home]
        [nav-link "#/about" "About" :about]
        (if @current-user
+
          [:<>
           [nav-link "#/chat" "Chat" :chat]
           [:a.navbar-item
@@ -50,6 +52,11 @@
            (str "Sign Out of " @current-user)]]
          [sign-up-login])]]]))
 
+(defn page []
+  (if-let [page @(rf/subscribe [:common/page])]
+    [:div
+     [navbar]
+     [page]]))
 
 
 (defn about-page []
@@ -204,6 +211,7 @@
    (str "Hello User")]
   )
 
+
 (defn chat-page []
   (let [message (r/atom "")]
     (fn []
@@ -251,11 +259,3 @@
                 (js/console.log err))}))}
          "SEND!"]]])))
 
-(defn page []
-  (if-let [page @(rf/subscribe [:common/page])]
-    [:div
-     [navbar]
-     [page]]))
-
-(defn user-page []
-  [:div "Hello"])

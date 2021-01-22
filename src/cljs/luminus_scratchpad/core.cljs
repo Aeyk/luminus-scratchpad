@@ -31,9 +31,7 @@
      ["/about" {:name :about
                 :view #'views/about-page}]
      ["/me" {:name :me
-             :view #'views/me-page}]
-     ["/user" {:name :user
-               :view #'views/user-page}]]))
+             :view #'views/me-page}]]))
 
 (defn start-router! []
   (rfe/start!
