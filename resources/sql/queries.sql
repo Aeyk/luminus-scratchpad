@@ -108,7 +108,7 @@ INSERT INTO messages (
   from_user_id,
   content
 ) VALUES (
-  (CAST :from_user_id AS uuid),
+  :from_user_id::uuid,
   :content
 );
 

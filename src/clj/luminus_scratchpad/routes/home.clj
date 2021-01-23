@@ -86,10 +86,29 @@
         (ok (try
               (db/insert-message!
                    {:content (-> request :body-params :message)
-                    :from_user_id (:id (db/get-user-by-email {:email "mksybr@gmail.com"}))}
+                    :from_user_id
+                    (:id 
+                     (db/get-user-by-username {:username (-> request :body-params :whoami)}))}
                #_(db/insert-message! (:body-params request)))
               (catch Exception e
                 (str (.getCause e))))))}}]
+;; * Index messages
+   ["/query/messages"
+    {:middleware [middleware/wrap-auth]
+     :get
+     {:handler
+      (fn [request]
+        (ok (try
+              (db/get-most-recent-messages {:count 7})
+              #_(db/insert-message!
+               {:content (-> request :body-params :message)
+                :from_user_id
+                (:id 
+                 (db/get-user-by-username {:username (-> request :body-params :whoami)}))}
+               #_(db/insert-message! (:body-params request)))
+              (catch Exception e
+                (str (.getCause e))))))}}]
+   
    
 ;; * Come with Luminus, just docs
    ["/docs" {:get (fn [_]

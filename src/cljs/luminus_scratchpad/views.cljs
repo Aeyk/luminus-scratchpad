@@ -210,42 +210,54 @@
   [:section.section>div.container>div.content
    (str "Hello User")]
   )
-
+(defn pull-messages [messages]
+  (GET "/query/messages"
+       {:headers {"Accept" "application/transit+json"
+                  "Authorization"
+                  (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+        :handler (fn [ok]
+                   (reset! messages
+                           (map :content ok)))}))
 (defn chat-page []
-  (let [message (r/atom "")]
+  (let [message (r/atom "")
+        messages (r/atom [])]
+    (js/setInterval (pull-messages messages) 500)
     (fn []
       [:section.section>div.container>div.content
-       [:div #_{:action "/actions/send"}
-        [:input.input {:default-value @message
-                       :on-change #(reset! message (-> % .-target .-value))}]
-        [:button.button
-         {:on-click
-          (fn [e]
-            (e.preventDefault)
-            (POST "/actions/send"
-                 {:headers {"Accept" "application/transit+json"
-                            "Authorization"
-                            (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-                  :params {:message @message}
-                  :handler (fn [ok]
-                             (js/console.log ok))} )
-            #_(POST
-             "/actions/send"
-             {:headers
-              {"Accept" "application/transit+json"
-               "Authorization"
-               (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-              :params
-              {"message" @message}
-              :handler
-              (fn [ok] ok)
-              :error-handler
-              (fn [{:keys [status status-text fail response] :as err}]
-                (js/console.log err))}))}
-         "SEND!"]]])))
-
-(defn page []
-  (if-let [page @(rf/subscribe [:common/page])]
-    [:div
-     [navbar]
-     [page]]))
+       (if (nil? @current-user)
+         [login-page]
+         [:div #_{:action "/actions/send"}
+          [:div
+           (for [message @messages]
+             [:p message])]
+          [:input.input {:value @message
+                         :on-change #(reset! message (-> % .-target .-value))}]
+          [:button.button
+           {:on-click
+            (fn [e]
+              (e.preventDefault)
+              (js/console.log (clj->js @current-user))
+              (POST "/actions/send"
+                    {:headers {"Accept" "application/transit+json"
+                               "Authorization"
+                               (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+                     :params {:message @message
+                              :whoami @current-user}
+                     :handler (fn [ok]
+                                (js/console.log ok))} )
+              (pull-messages messages)
+              (reset! message "")
+              #_(POST
+                 "/actions/send"
+                 {:headers
+                  {"Accept" "application/transit+json"
+                   "Authorization"
+                   (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+                  :params
+                  {"message" @message}
+                  :handler
+                  (fn [ok] ok)
+                  :error-handler
+                  (fn [{:keys [status status-text fail response] :as err}]
+                    (js/console.log err))}))}
+           "SEND!"]])])))
