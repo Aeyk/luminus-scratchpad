@@ -35,7 +35,7 @@
                  [org.clojure/tools.cli "1.0.194"]
                  [org.clojure/tools.logging "1.1.0"]
                  [org.postgresql/postgresql "42.2.18"]
-                 #_[com.impossibl.pgjdbc-ng/pgjdbc-ng "0.8.6"]
+                 [com.impossibl.pgjdbc-ng/pgjdbc-ng "0.8.6"]
                  [org.webjars.npm/bulma "0.9.1"]
                  [org.webjars.npm/material-icons "0.3.1"]
                  [org.webjars/webjars-locator "0.40"]
@@ -47,8 +47,7 @@
                  [selmer "1.12.31"]
                  [thheller/shadow-cljs "2.11.5" :scope "provided"]
                  [cljs-http "0.1.46"]
-                 [com.draines/postal "2.0.4"]
-                 ]
+                 [com.draines/postal "2.0.4"]]
 
   :min-lein-version "2.0.0"
   
