@@ -122,7 +122,6 @@ SELECT *
  ORDER BY created_at DESC
  LIMIT :count;
 
-
-
-
-
+-- :name event! :! :n
+-- :doc insert a new event
+INSERT INTO events (event) VALUES (:event)
