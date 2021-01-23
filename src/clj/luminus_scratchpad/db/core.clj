@@ -11,7 +11,9 @@
     [conman.core :as conman]
     [luminus-scratchpad.config :refer [env]]
     [mount.core :refer [defstate]])
-  (:import com.impossibl.postgres.api.jdbc.PGNotificationListener))
+  (:import (com.impossibl.postgres.api.jdbc
+            PGNotificationListener
+            PGConnection)))
 
 (defstate ^:dynamic *db*
   :start (if-let [jdbc-url (env :database-url)]
@@ -23,14 +25,16 @@
 
 (conman/bind-connection *db* "sql/queries.sql")
 
-(defn pgobj->clj [^org.postgresql.util.PGobject pgobj]
-  (let [type (.getType pgobj)
-        value (.getValue pgobj)]
-    (case type
-      "json" (parse-string value true)
-      "jsonb" (parse-string value true)
-      "citext" (str value)
-      value)))
+#_(defn pgobj->clj [^org.postgresql.util.PGobject pgobj]
+    (let [type (.getType pgobj)
+          value (.getValue pgobj)]
+      (case type
+        "json" (parse-string value true)
+        "jsonb" (parse-string value true)
+        "citext" (str value)
+        value)))
+
+
 
 (extend-protocol next.jdbc.result-set/ReadableColumn
   java.sql.Timestamp

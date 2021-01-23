@@ -144,12 +144,12 @@
   :start (atom #{}))
 
 (mount/defstate ^{:on-reload :noop} event-listener
-  :start (db/add-listener
+  :start (db/add-listenre
           db/notifications-connection
           :events
           (fn [_ _ message]
             (doseq [channel @channels]
-              (http/send! channel message))))
+              #_(http/send! channel message))))
   :stop (db/remove-listener
          db/notifications-connection
          event-listener))

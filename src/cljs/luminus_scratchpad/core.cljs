@@ -6,6 +6,7 @@
     [re-frame.core :as rf]
     [goog.events :as events]
     [goog.history.EventType :as HistoryEventType]
+    [luminus-scratchpad.websockets :as ws]
     [luminus-scratchpad.ajax :as ajax]
     [luminus-scratchpad.events]
     [reitit.core :as reitit]
@@ -46,6 +47,9 @@
 ;; Initialize app
 (defn ^:dev/after-load mount-components []
   (rf/clear-subscription-cache!)
+
+  (ws/make-websocket! (str "ws://" (.-host js/location) "/ws")
+                      views/update-messages!)
   (if (not (nil? (js/localStorage.getItem "scratch-client-name")))
     (reset! views/current-user (js/localStorage.getItem "scratch-client-name")))
   (rdom/render [#'views/page] (.getElementById js/document "app")))

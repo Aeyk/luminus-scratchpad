@@ -211,17 +211,21 @@
    (str "Hello User")]
   )
 (defn pull-messages [messages]
-  (GET "/query/messages"
+  
+  #_(GET "/query/messages"
        {:headers {"Accept" "application/transit+json"
                   "Authorization"
                   (str "Token " (js/localStorage.getItem "scratch-client-key"))}
         :handler (fn [ok]
                    (reset! messages
                            (map :content ok)))}))
+
+(defn update-messages! [{:keys [message]}]
+  (swap! messages #(vec (take 10 (conj % message)))))
+
 (defn chat-page []
   (let [message (r/atom "")
         messages (r/atom [])]
-    (js/setInterval (pull-messages messages) 500)
     (fn []
       [:section.section>div.container>div.content
        (if (nil? @current-user)
