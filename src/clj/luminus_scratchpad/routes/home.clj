@@ -54,7 +54,7 @@
        #_(if-not (auth/authenticated? request)
          (auth/throw-unauthorized))
        (ok {:status "Logged" :message (str "hello logged user "
-                                           (:identity request))}))}]
+                                            request)}))}]
    ;; * Get Authentication Token for [email password]
    ["/actions/login"
     {:post
@@ -87,7 +87,7 @@
               (db/insert-message!
                    {:content (-> request :body-params :message)
                     :from_user_id
-                    (:id 
+                    (:id
                      (db/get-user-by-username {:username (-> request :body-params :whoami)}))}
                #_(db/insert-message! (:body-params request)))
               (catch Exception e
@@ -100,16 +100,10 @@
       (fn [request]
         (ok (try
               (db/get-most-recent-messages {:count 7})
-              #_(db/insert-message!
-               {:content (-> request :body-params :message)
-                :from_user_id
-                (:id 
-                 (db/get-user-by-username {:username (-> request :body-params :whoami)}))}
-               #_(db/insert-message! (:body-params request)))
               (catch Exception e
                 (str (.getCause e))))))}}]
-   
-   
+
+
 ;; * Come with Luminus, just docs
    ["/docs" {:get (fn [_]
                     (-> (response/ok (-> "docs/docs.md" io/resource slurp))

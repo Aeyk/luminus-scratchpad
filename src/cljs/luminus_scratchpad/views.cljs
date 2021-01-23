@@ -227,6 +227,18 @@
        (if (nil? @current-user)
          [login-page]
          [:div #_{:action "/actions/send"}
+          [:button.button
+           {:on-click
+            (fn [e]
+              (GET
+               "/me"
+               {:headers
+                {#_#_"Accept" "application/transit+json"
+                 "x-csrf-token" js/csrfToken
+                 "identity" (js/localStorage.getItem "scratch-client-key")
+                 "Authorization"
+                 (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+                :handler (fn [ok] ok)} ))}]
           [:div
            (for [message @messages]
              [:p message])]

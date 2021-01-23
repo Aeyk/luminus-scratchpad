@@ -58,9 +58,9 @@
                      :on-error on-error}))
 
 (defn wrap-auth [handler]
-  (as-> handler $
-    (wrap-authorization $ auth/token-backend)
-    (wrap-authentication $ auth/token-backend)))
+  (-> handler
+    (wrap-authentication auth/token-backend)
+    (wrap-authorization auth/token-backend)))
 
 ;; (defn auth
 ;;   "Middleware used in routes that require authentication. If request is not
