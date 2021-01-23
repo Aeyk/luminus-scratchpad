@@ -144,4 +144,6 @@
 
 
   (create-migration "add-messages-table")
+
+  (create-migration "enable-pg_notify")
   )
