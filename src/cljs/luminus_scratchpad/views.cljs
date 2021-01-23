@@ -56,24 +56,17 @@
 
 (defn music-page []
   (let [sq (mantra/osc :type :square)]
-    #_(mantra/play-notes)
     (js/console.log
-     (map
-      (fn [e] (into e {:duration 300}))
-      (take 5 (repeatedly {:pitch (pitch/note->hz "A2")}))))
-    (mantra/play-note
-     sq
-     {:pitch
-      (pitch/note->hz "A2") :duration 250})
-    (fn []
-      [:section.section>div.container>div.content
-       [:p "Hello"]]))
+     ))
+  (fn []
+    [:section.section>div.container>div.content
+     [:p "Hello"]]))
 
-  (defn page []
-    (if-let [page @(rf/subscribe [:common/page])]
-      [:div
-       [navbar]
-       [page]])))
+(defn page []
+  (if-let [page @(rf/subscribe [:common/page])]
+    [:div
+     [navbar]
+     [page]]))
 
 
 (defn about-page []

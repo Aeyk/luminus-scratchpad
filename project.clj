@@ -49,7 +49,7 @@
                  [cljs-http "0.1.46"]
                  [com.draines/postal "2.0.4"]
                  [io.djy/mantra "0.6.1"]
-                 [music-theory "0.3.1"b]]
+                 [music-theory "0.3.1"]]
 
   :min-lein-version "2.0.0"
   

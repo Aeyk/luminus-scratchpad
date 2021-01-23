@@ -148,4 +148,11 @@
   (do
     (mount/stop)
     (mount/start))
+
+  (keyword "Hello")
+  (let [chords [[:Bb :Bbmaj7] [:F :F7] [:C] :Cmaj7 [:D :Dm7]]]
+    (for [chord
+          chords]
+      chord))
+  
   )
