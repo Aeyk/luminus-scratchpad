@@ -146,5 +146,14 @@
   (create-migration "add-messages-table")
 
   (create-migration "enable-pg_notify")
+  (do
+    (mount/stop)
+    (mount/start))
 
+  (db/add-listener
+   db/notifications-connection
+   "events"
+   (fn [& args]
+     (apply println "got message:" args)))
+  (db/event! {:event "Hello world!"})
   )

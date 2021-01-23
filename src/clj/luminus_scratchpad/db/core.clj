@@ -1,6 +1,8 @@
 (ns luminus-scratchpad.db.core
   (:require
     [cheshire.core :refer [generate-string parse-string]]
+    [clojure.java.jdbc :as jdbc] ;; TODO update
+    
     [buddy.hashers :as hashers]
     [next.jdbc.date-time]
     [next.jdbc.prepare]
@@ -9,7 +11,7 @@
     [conman.core :as conman]
     [luminus-scratchpad.config :refer [env]]
     [mount.core :refer [defstate]])
-  (:import (org.postgresql.util PGobject)))
+  (:import com.impossibl.postgres.api.jdbc.PGNotificationListener))
 
 (defstate ^:dynamic *db*
   :start (if-let [jdbc-url (env :database-url)]
@@ -122,3 +124,21 @@
 (defn login! [user]
   (add-user-event! user "login"))
 
+
+
+(defstate notifications-connection
+  :start (jdbc/get-connection {:connection-uri (env :database-url)})
+  :stop (.close notifications-connection))
+
+(defn add-listener [conn id listener-fn]
+  (let [listener (proxy [PGNotificationListener] []
+                   (notification [chan-id channel message]
+                     (listener-fn chan-id channel message)))]
+    (.addNotificationListener conn listener)
+    (jdbc/db-do-commands
+     {:connection notifications-connection}
+     (str "LISTEN " (name id)))
+    listener))
+
+(defn remove-listener [conn listener]
+  (.removeNotificationListener conn listener))
