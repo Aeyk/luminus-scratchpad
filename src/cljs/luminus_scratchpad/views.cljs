@@ -3,8 +3,10 @@
             [reitit.core :as reitit]
             [re-frame.core :as rf]
             [markdown.core :refer [md->html]]
-            [ajax.core :refer [GET POST]]))
-
+            [ajax.core :refer [GET POST]]
+            [music-theory.pitch :as pitch]
+            [music-theory.chord :as chord]
+            [mantra.core :as mantra]))
 
 (defonce current-user (r/atom nil))
 
@@ -43,6 +45,7 @@
       [:div.navbar-start
        [nav-link "#/" "Home" :home]
        [nav-link "#/about" "About" :about]
+       [nav-link "#/music" "Music" :music]
        (if @current-user
          [:<>
           [nav-link "#/chat" "Chat" :chat]
@@ -51,11 +54,26 @@
            (str "Sign Out of " @current-user)]]
          [sign-up-login])]]]))
 
-(defn page []
-  (if-let [page @(rf/subscribe [:common/page])]
-    [:div
-     [navbar]
-     [page]]))
+(defn music-page []
+  (let [sq (mantra/osc :type :square)]
+    #_(mantra/play-notes)
+    (js/console.log
+     (map
+      (fn [e] (into e {:duration 300}))
+      (take 5 (repeatedly {:pitch (pitch/note->hz "A2")}))))
+    (mantra/play-note
+     sq
+     {:pitch
+      (pitch/note->hz "A2") :duration 250})
+    (fn []
+      [:section.section>div.container>div.content
+       [:p "Hello"]]))
+
+  (defn page []
+    (if-let [page @(rf/subscribe [:common/page])]
+      [:div
+       [navbar]
+       [page]])))
 
 
 (defn about-page []
@@ -204,6 +222,7 @@
                              (swap! state assoc :flash [status status-text (get-in response [:status :type])])
                              )}))
              :default-value "Register an account"}]]])])))
+
 
 (defn me-page []
 

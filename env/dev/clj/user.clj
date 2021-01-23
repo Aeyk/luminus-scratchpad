@@ -144,4 +144,8 @@
 
 
   (create-migration "add-messages-table")
+
+  (do
+    (mount/stop)
+    (mount/start))
   )

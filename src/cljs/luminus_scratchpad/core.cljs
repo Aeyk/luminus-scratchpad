@@ -33,7 +33,9 @@
      ["/me" {:name :me
              :view #'views/me-page}]
      ["/chat" {:name :chat
-             :view #'views/chat-page}]]))
+               :view #'views/chat-page}]
+     ["/music" {:name :music
+                :view #'views/music-page}]]))
 
 
 (defn start-router! []
