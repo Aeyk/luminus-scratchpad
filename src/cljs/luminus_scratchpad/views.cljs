@@ -348,8 +348,10 @@
                               :whoami @current-user}
                      :handler (fn [ok]
                                 (js/console.log ok))} )
-              (pull-messages messages)
               (reset! message "")
+              (js/setTimeout
+               (pull-messages messages)
+               500)
               #_(POST
                  "/actions/send"
                  {:headers
@@ -363,6 +365,7 @@
                   :error-handler
                   (fn [{:keys [status status-text fail response] :as err}]
                     (js/console.log err))}))}
-           "SEND!"]])])))
+
+           (if (empty? @message) "DELETE" "SEND!")]])])))
 
 
