@@ -49,7 +49,10 @@
                  [cljs-http "0.1.46"]
                  [com.draines/postal "2.0.4"]
                  [io.djy/mantra "0.6.1"]
-                 [music-theory "0.3.1"]]
+                 [music-theory "0.3.1"]
+                 [quil "3.1.0"]
+                 [keybind "2.2.0"]
+                 [thi.ng/geom "0.0.908"]]
 
   :min-lein-version "2.0.0"
   
