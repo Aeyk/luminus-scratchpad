@@ -219,9 +219,7 @@
                    (js/console.log @state))})
                ;; * Check Auth
                (GET "/me"
-                    {:headers {#_#_"Accept" "application/transit+json"
-                               "x-csrf-token" js/csrfToken
-                               "identity" (js/localStorage.getItem "scratch-client-key")
+                    {:headers {"Accept" "application/json"
                                "Authorization"
                                (str "Token " (js/localStorage.getItem "scratch-client-key"))}
                      :handler (fn [ok] ok)} )
@@ -305,16 +303,16 @@
   )
 (defn pull-messages [messages]
   (GET "/query/messages"
-       {:headers {"Accept" "application/transit+json"
-                  "Authorization"
-                  (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+       {:headers
+        {"Authorization"
+         (str "Token " (js/localStorage.getItem "scratch-client-key"))}
         :handler (fn [ok]
                    (reset! messages
                            (map :content ok)))}))
 (defn chat-page []
   (let [message (r/atom "")
         messages (r/atom [])]
-    (js/setInterval (pull-messages messages) 500)
+    (pull-messages messages)
     (fn []
       [:section.section>div.container>div.content
        (if (nil? @current-user)
