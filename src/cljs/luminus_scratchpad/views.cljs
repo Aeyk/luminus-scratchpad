@@ -1,11 +1,15 @@
 (ns luminus-scratchpad.views
   (:require [reagent.core :as r]
+            [reagent.dom :as rd]
             [reitit.core :as reitit]
             [re-frame.core :as rf]
             [markdown.core :refer [md->html]]
-            [ajax.core :refer [GET POST]]))
-
-
+            [ajax.core :refer [GET POST]]
+            [music-theory.pitch :as pitch]
+            [music-theory.chord :as chord]
+            [quil.core :as q]
+            [quil.middleware :as m]
+            [mantra.core :as mantra]))
 (defonce current-user (r/atom nil))
 
 
@@ -43,6 +47,7 @@
       [:div.navbar-start
        [nav-link "#/" "Home" :home]
        [nav-link "#/about" "About" :about]
+       [nav-link "#/music" "Music" :music]
        (if @current-user
          [:<>
           [nav-link "#/chat" "Chat" :chat]
@@ -50,6 +55,93 @@
            {:on-click logout-handler}
            (str "Sign Out of " @current-user)]]
          [sign-up-login])]]]))
+;; * Quil
+(def user-state (atom {:x 10 :y 10
+                       :delta [0 0]}))
+
+
+(defn draw [{:keys [circles]}]
+  (q/background 255)
+  (q/fill 0 255 0)
+  (let [{[x y] :pos [r g b] :color} (last circles)]
+    (q/fill r g b)
+    (q/ellipse x y x x)))
+
+(defn click-handler [{:keys [width height] :as state}]
+  (update state :circles conj
+          {:pos   [(q/mouse-x)
+                   (q/mouse-y)]
+           :color [(mod (+ (q/mouse-x)
+                           (q/mouse-x)) 255)
+                   (mod (+ (q/mouse-x)
+                           (q/mouse-y)) 255)
+                   (mod (+ (q/mouse-y)
+                           (q/mouse-y)) 255)]}))
+
+(defn update-state [{:keys [width height] :as state}]
+  (update state :circles conj 
+          (let [{:keys [x y delta]} @user-state]
+            {:pos [x y]
+             :color [100 100 100]})))
+
+(defn init [width height]
+  (fn []
+    {:width   width
+     :height  height
+     :circles [{:pos [10 10]
+                :color [100 100 100]}]}))
+
+(def moves
+  {:up [0 -10]
+   :down [0 10]
+   :left [-10 0]
+   :right [10 0]
+   :still [0 0]})
+
+(defn key-handler [state]
+  (let [k (q/raw-key)]
+    (case k
+      \w :up
+      \W :up
+
+      \a :left
+      \A :left
+
+      \s :down
+      \S :down
+
+      \d :right
+      \D :right)))
+
+(defn circle-canvas []
+  (r/create-class
+   {:component-did-mount
+    (fn [component]
+      (let [node (rd/dom-node component)
+            width  (.-innerWidth js/window)
+            height (.-innerHeight js/window)]
+        (q/sketch
+         :host node
+         :draw draw
+         :setup (init width height)
+         :update update-state
+         :size [width height]
+         :middleware [m/fun-mode]
+         :mouse-clicked click-handler
+         :key-pressed key-handler
+         )))
+    :render
+    (fn [] [:div])}))
+
+;; * Music Page
+(defn music-page []
+  (let [sq (mantra/osc :type :square)]
+    (js/console.log
+     ))
+  (fn []
+    [:section.section>div.container>div.content
+     [circle-canvas]
+     [:p "Hello"]]))
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
@@ -127,9 +219,7 @@
                    (js/console.log @state))})
                ;; * Check Auth
                (GET "/me"
-                    {:headers {#_#_"Accept" "application/transit+json"
-                               "x-csrf-token" js/csrfToken
-                               "identity" (js/localStorage.getItem "scratch-client-key")
+                    {:headers {"Accept" "application/json"
                                "Authorization"
                                (str "Token " (js/localStorage.getItem "scratch-client-key"))}
                      :handler (fn [ok] ok)} )
@@ -205,17 +295,17 @@
                              )}))
              :default-value "Register an account"}]]])])))
 
+
 (defn me-page []
 
   [:section.section>div.container>div.content
    (str "Hello User")]
   )
 (defn pull-messages [messages]
-  
-  #_(GET "/query/messages"
-       {:headers {"Accept" "application/transit+json"
-                  "Authorization"
-                  (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+  (GET "/query/messages"
+       {:headers
+        {"Authorization"
+         (str "Token " (js/localStorage.getItem "scratch-client-key"))}
         :handler (fn [ok]
                    (reset! messages
                            (map :content ok)))}))
@@ -226,6 +316,7 @@
 (defn chat-page []
   (let [message (r/atom "")
         messages (r/atom [])]
+    (pull-messages messages)
     (fn []
       [:section.section>div.container>div.content
        (if (nil? @current-user)
@@ -261,8 +352,10 @@
                               :whoami @current-user}
                      :handler (fn [ok]
                                 (js/console.log ok))} )
-              (pull-messages messages)
               (reset! message "")
+              (js/setTimeout
+               (pull-messages messages)
+               500)
               #_(POST
                  "/actions/send"
                  {:headers
@@ -276,4 +369,7 @@
                   :error-handler
                   (fn [{:keys [status status-text fail response] :as err}]
                     (js/console.log err))}))}
-           "SEND!"]])])))
+
+           (if (empty? @message) "DELETE" "SEND!")]])])))
+
+

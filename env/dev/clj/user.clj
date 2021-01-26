@@ -146,6 +146,7 @@
     (create-migration "add-messages-table")
 
   (create-migration "enable-pg_notify")
+
   (do
     (mount/stop)
     (mount/start))
@@ -156,6 +157,10 @@
    (fn [& args]
      (apply println "got message:" args)))
   (db/event! {:event "Hello world!"})
-
+  (keyword "Hello")
+  (let [chords [[:Bb :Bbmaj7] [:F :F7] [:C] :Cmaj7 [:D :Dm7]]]
+    (for [chord
+          chords]
+      chord))
   
   )
