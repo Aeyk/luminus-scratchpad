@@ -304,7 +304,8 @@
    (str "Hello User")]
   )
 (defn pull-messages [messages]
-  (GET "/query/messages"
+  #_(ws/send-transit-msg! (str {:event {:message "Hello, again>?"}}))
+  #_(GET "/query/messages"
        {:headers
         {"Authorization"
          (str "Token " (js/localStorage.getItem "scratch-client-key"))}
@@ -324,7 +325,8 @@
           [:button.button
            {:on-click
             (fn [e]
-              (GET
+              (ws/send-transit-msg! @message)
+              #_(GET
                "/me"
                {:headers
                 {#_#_"Accept" "application/transit+json"
