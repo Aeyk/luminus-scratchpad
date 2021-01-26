@@ -144,7 +144,7 @@
   :start (atom #{}))
 
 (mount/defstate ^{:on-reload :noop} event-listener
-  :start (db/add-listenre
+  :start (db/add-listener
           db/notifications-connection
           :events
           (fn [_ _ message]

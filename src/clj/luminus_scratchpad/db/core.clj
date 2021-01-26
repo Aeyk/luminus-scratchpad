@@ -58,14 +58,14 @@
   (read-column-by-index [^java.sql.Array v _2 _3]
     (vec (.getArray v)))
   ;; TODO FIXME
-  (comment
-    org.postgresql.util.PGobject
-    (read-column-by-label [^org.postgresql.util.PGobject pgobj _]
-                          (pgobj->clj pgobj))
-    (read-column-by-index [^org.postgresql.util.PGobject pgobj _2 _3]
-                          (pgobj->clj pgobj))))
+  #_#_#_
+  org.postgresql.util.PGobject
+  (read-column-by-label [^org.postgresql.util.PGobject pgobj _]
+    (pgobj->clj pgobj))
+  (read-column-by-index [^org.postgresql.util.PGobject pgobj _2 _3]
+    (pgobj->clj pgobj)))
 
-(defn clj->jsonb-pgobj [value]
+#_(defn clj->jsonb-pgobj [value]
   (doto (PGobject.)
     (.setType "jsonb")
     (.setValue (generate-string value))))
@@ -73,7 +73,7 @@
 (extend-protocol next.jdbc.prepare/SettableParameter
   clojure.lang.IPersistentMap
   (set-parameter [^clojure.lang.IPersistentMap v ^java.sql.PreparedStatement stmt ^long idx]
-    (.setObject stmt idx (clj->jsonb-pgobj v)))
+    (.setObject stmt idx v #_(clj->jsonb-pgobj v)))
   clojure.lang.IPersistentVector
   (set-parameter [^clojure.lang.IPersistentVector v ^java.sql.PreparedStatement stmt ^long idx]
     (let [conn      (.getConnection stmt)
@@ -82,7 +82,7 @@
       (if-let [elem-type (when (= (first type-name) \_)
                            (apply str (rest type-name)))]
         (.setObject stmt idx (.createArrayOf conn elem-type (to-array v)))
-        (.setObject stmt idx (clj->jsonb-pgobj v))))))
+        (.setObject stmt idx v #_(clj->jsonb-pgobj v))))))
 
 (defn username-exists? [user]
   (some? (get-user-by-username user)))

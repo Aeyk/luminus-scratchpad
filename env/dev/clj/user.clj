@@ -89,9 +89,10 @@
                     :username "mksybr"
                     :password
                     (hashers/derive "OceanicReterritorializationProcess")
-                    :history (db/clj->jsonb-pgobj "{}")
-                    :user_data (db/clj->jsonb-pgobj "{}")
-                    :permissions (db/clj->jsonb-pgobj {:role :user})})
+                    :history "{}" #_(db/clj->jsonb-pgobj "{}")
+                    :user_data "{}" #_(db/clj->jsonb-pgobj "{}")
+                    :permissions  {:role :user}
+                    #_(db/clj->jsonb-pgobj {:role :user})})
 
   (jwt/sign #_{:claims {}})
 
@@ -142,8 +143,7 @@
     [email password])
   {:email "1" :password ""}
 
-
-  (create-migration "add-messages-table")
+    (create-migration "add-messages-table")
 
   (create-migration "enable-pg_notify")
   (do
