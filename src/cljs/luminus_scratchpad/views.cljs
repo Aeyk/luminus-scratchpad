@@ -301,6 +301,7 @@
   [:section.section>div.container>div.content
    (str "Hello User")]
   )
+
 (defn pull-messages [messages]
   (GET "/query/messages"
        {:headers
@@ -309,10 +310,6 @@
         :handler (fn [ok]
                    (reset! messages
                            (map :content ok)))}))
-
-(defn update-messages! [{:keys [message]}]
-  (swap! messages #(vec (take 10 (conj % message)))))
-
 (defn chat-page []
   (let [message (r/atom "")
         messages (r/atom [])]
