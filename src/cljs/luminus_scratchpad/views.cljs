@@ -303,15 +303,6 @@
   [:section.section>div.container>div.content
    (str "Hello User")]
   )
-
-(def messages (atom []))
-
-(defn update-messages!
-  ([{:keys [message]}]
-   (update-messages! messages))
-  ([{:keys [message]} messages]
-   (swap! messages #(vec (take 10 (conj % message))))))
-
 (defn pull-messages [messages]
   (GET "/query/messages"
        {:headers
@@ -320,6 +311,7 @@
         :handler (fn [ok]
                    (reset! messages
                            (map :content ok)))}))
+
 (defn chat-page []
   (let [message (r/atom "")
         messages (r/atom [])]
@@ -332,7 +324,15 @@
           [:button.button
            {:on-click
             (fn [e]
-              )}]
+              (GET
+               "/me"
+               {:headers
+                {#_#_"Accept" "application/transit+json"
+                 "x-csrf-token" js/csrfToken
+                 "identity" (js/localStorage.getItem "scratch-client-key")
+                 "Authorization"
+                 (str "Token " (js/localStorage.getItem "scratch-client-key"))}
+                :handler (fn [ok] ok)} ))}]
           [:div
            (for [message @messages]
              [:p message])]
