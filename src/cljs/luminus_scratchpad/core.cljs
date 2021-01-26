@@ -50,7 +50,9 @@
 (defn ^:dev/after-load mount-components []
   (rf/clear-subscription-cache!)
 
-  (ws/make-websocket! (str "wss://" (.-host js/location) "/ws")
+  (ws/connect-ws
+   (str "wss://" (.-host js/location) "/ws")
+  #_(ws/make-websocket! (str "wss://" (.-host js/location) "/ws")
                       views/update-messages!)
   (if (not (nil? (js/localStorage.getItem "scratch-client-name")))
     (reset! views/current-user (js/localStorage.getItem "scratch-client-name")))
