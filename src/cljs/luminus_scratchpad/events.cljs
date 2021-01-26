@@ -76,3 +76,26 @@
   :common/error
   (fn [db _]
     (:common/error db)))
+
+
+;; *  event
+(rf/reg-event-db
+ :event
+ (fn [db [_ event]]
+   (update db :events (fnil conj []) event)))
+
+
+(rf/reg-event-fx
+ :fetch-latest-messages
+ (fn [_ _]
+   {:http-xhrio
+    {:method          :get
+     :uri             "/query/messsages"
+     :response-format (ajax/raw-response-format)}}))
+
+
+(rf/reg-sub
+ :events
+ (fn [db _]
+   {:dispatch [:fetch-latest-messages]
+    :events (:events db)}))

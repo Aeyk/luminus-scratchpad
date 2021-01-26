@@ -10,6 +10,8 @@
             [quil.core :as q]
             [quil.middleware :as m]
             [luminus-scratchpad.websockets :as ws]
+            [luminus-scratchpad.handlers]
+            [luminus-scratchpad.subscriptions]
             [mantra.core :as mantra]))
 
 (defonce current-user (r/atom nil))
@@ -303,74 +305,25 @@
   [:section.section>div.container>div.content
    (str "Hello User")]
   )
-(defn pull-messages [messages]
-  #_(ws/send-transit-msg! (str {:event {:message "Hello, again>?"}}))
-  #_(GET "/query/messages"
-       {:headers
-        {"Authorization"
-         (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-        :handler (fn [ok]
-                   (reset! messages
-                           (map :content ok)))}))
 
 (defn chat-page []
   (let [message (r/atom "")
         messages (r/atom [])]
-    (pull-messages messages)
     (fn []
       [:section.section>div.container>div.content
        (if (nil? @current-user)
          [login-page]
          [:div #_{:action "/actions/send"}
-          [:button.button
-           {:on-click
-            (fn [e]
-              (ws/send-transit-msg! @message)
-              #_(GET
-               "/me"
-               {:headers
-                {#_#_"Accept" "application/transit+json"
-                 "x-csrf-token" js/csrfToken
-                 "identity" (js/localStorage.getItem "scratch-client-key")
-                 "Authorization"
-                 (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-                :handler (fn [ok] ok)} ))}]
           [:div
-           (for [message @messages]
+           (for [message @(rf/subscribe [:events])]
              [:p message])]
           [:input.input {:value @message
                          :on-change #(reset! message (-> % .-target .-value))}]
           [:button.button
            {:on-click
             (fn [e]
-              (e.preventDefault)
-              (js/console.log (clj->js @current-user))
-              (POST "/actions/send"
-                    {:headers {"Accept" "application/transit+json"
-                               "Authorization"
-                               (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-                     :params {:message @message
-                              :whoami @current-user}
-                     :handler (fn [ok]
-                                (js/console.log ok))} )
-              (reset! message "")
-              (js/setTimeout
-               (pull-messages messages)
-               500)
-              #_(POST
-                 "/actions/send"
-                 {:headers
-                  {"Accept" "application/transit+json"
-                   "Authorization"
-                   (str "Token " (js/localStorage.getItem "scratch-client-key"))}
-                  :params
-                  {"message" @message}
-                  :handler
-                  (fn [ok] ok)
-                  :error-handler
-                  (fn [{:keys [status status-text fail response] :as err}]
-                    (js/console.log err))}))}
-
-           (if (empty? @message) "DELETE" "SEND!")]])])))
+              (rf/dispatch [:event @message])
+              (reset! message ""))}
+           "SEND"]])])))
 
 

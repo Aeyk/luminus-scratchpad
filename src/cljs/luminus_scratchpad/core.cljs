@@ -48,12 +48,12 @@
 ;; -------------------------
 ;; Initialize app
 (defn ^:dev/after-load mount-components []
-  (rf/clear-subscription-cache!)
-
+  (rf/clear-subscription-cache!)  
+  
   (ws/connect-ws
-   (str "wss://" (.-host js/location) "/ws")
-  #_(ws/make-websocket! (str "wss://" (.-host js/location) "/ws")
-                      views/update-messages!)
+   (str "ws://" (.-host js/location) "/ws")
+   #(rf/dispatch [:event %]))
+  
   (if (not (nil? (js/localStorage.getItem "scratch-client-name")))
     (reset! views/current-user (js/localStorage.getItem "scratch-client-name")))
   (rdom/render [#'views/page] (.getElementById js/document "app")))

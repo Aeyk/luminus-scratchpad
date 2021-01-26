@@ -16,12 +16,13 @@
    [buddy.auth :as auth]
    [buddy.auth.accessrules :as acl]
    [ajax.core :refer [GET POST]]
+   [cognitect.transit :as t]
    [ring.util.http-response :as response]))
 
 ;; * WebSocket Utils  etc
 (defonce ws-chan (atom nil))
-(def json-reader (t/reader :json))
-(def json-writer (t/writer :json))
+(def json-reader #(t/reader % :json))
+(def json-writer #(t/writer % :json))
 
 (defn receive-transit-msg!
   [update-fn]
@@ -182,7 +183,7 @@
           :events
           (fn [_ _ message]
             (doseq [channel @channels]
-              #_(http/send! channel message))))
+              (send! channel message))))
   :stop (db/remove-listener
          db/notifications-connection
          event-listener))
