@@ -3,7 +3,7 @@
    [luminus-scratchpad.layout :as layout]
    [clojure.tools.logging :as log]
    [org.httpkit.server
-    :refer [send! with-channel on-close on-receive]]
+    :refer [as-channel send! with-channel on-close on-receive]]
    [luminus.http-server :as http]
    [luminus-scratchpad.db.core :as db]
    [mount.core :as mount]
@@ -15,11 +15,14 @@
    [buddy.hashers :as hashers]
    [buddy.auth :as auth]
    [buddy.auth.accessrules :as acl]
-   [ajax.core :refer [GET POST]]   
+   [ajax.core :refer [GET POST]]
    [ring.util.http-response :as response]))
 
 ;; * WebSocket Utils  etc
 (defonce channels (atom #{}))
+
+(defn persist-event! [_ event]
+  (db/event! {:event event}))
 
 (defn connect! [channel]
   (log/info "channel open")
@@ -73,7 +76,6 @@
    ["/" {:middleware [middleware/wrap-csrf
                       middleware/wrap-formats]
          :get home-page}]
-
 ;; * Check if logged in 
    ["/me"
     {:middleware [middleware/wrap-auth]
@@ -111,15 +113,21 @@
      :post
      {:handler
       (fn [request]
-        (ok (try
-              (db/insert-message!
-                   {:content (-> request :body-params :message)
-                    :from_user_id
-                    (:id
-                     (db/get-user-by-username {:username (-> request :body-params :whoami)}))}
-               #_(db/insert-message! (:body-params request)))
-              (catch Exception e
-                (str (.getCause e))))))}}]
+        (ok
+         (try
+           (let [message
+                 {:content
+                  (-> request :body-params :message)
+                  :from_user_id
+                  (:id
+                   (db/get-user-by-username
+                    {:username (-> request :body-params :whoami)}))}]
+             (db/event! {:event 
+                         {:message message}})
+             (db/insert-message!
+              message))
+           (catch Exception e
+             (str (.getCause e))))))}}]
 ;; * Index messages
    ["/query/messages"
     {:middleware [middleware/wrap-auth]
