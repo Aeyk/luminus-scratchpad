@@ -57,11 +57,13 @@
     (vec (.getArray v)))
   (read-column-by-index [^java.sql.Array v _2 _3]
     (vec (.getArray v)))
-  org.postgresql.util.PGobject
-  (read-column-by-label [^org.postgresql.util.PGobject pgobj _]
-    (pgobj->clj pgobj))
-  (read-column-by-index [^org.postgresql.util.PGobject pgobj _2 _3]
-    (pgobj->clj pgobj)))
+  ;; TODO FIXME
+  (comment
+    org.postgresql.util.PGobject
+    (read-column-by-label [^org.postgresql.util.PGobject pgobj _]
+                          (pgobj->clj pgobj))
+    (read-column-by-index [^org.postgresql.util.PGobject pgobj _2 _3]
+                          (pgobj->clj pgobj))))
 
 (defn clj->jsonb-pgobj [value]
   (doto (PGobject.)
