@@ -156,7 +156,7 @@
    db/notifications-connection
    "events"
    (fn [& args]
-     (apply log/log "got message:" args)))
+     (log/log (str  "got message:" args))))
 
   
   (keyword "Hello")
