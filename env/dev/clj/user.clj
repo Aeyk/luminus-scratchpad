@@ -18,6 +18,7 @@
    [conman.core :as conman]
    [buddy.hashers :as hashers]
    [ajax.core :refer [GET POST]]
+   [taoensso.timbre :as log]
    [luminus-migrations.core :as migrations]))
 
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
@@ -155,8 +156,9 @@
    db/notifications-connection
    "events"
    (fn [& args]
-     (apply println "got message:" args)))
-  (db/event! {:event "Hello world!"})
+     (apply log/log "got message:" args)))
+
+  
   (keyword "Hello")
   (let [chords [[:Bb :Bbmaj7] [:F :F7] [:C] :Cmaj7 [:D :Dm7]]]
     (for [chord
