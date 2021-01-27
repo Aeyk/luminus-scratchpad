@@ -1,21 +1,8 @@
 # luminus-scratchpad
 
-generated using Luminus version "3.91"
+This is just a luminus project to play and learn.
 
-FIXME
+Some of the implmented features include an means to register new users, 
+identify and authenticate users, an authorizes routes, only showing with correct authorizations.
 
-## Prerequisites
-
-You will need [Leiningen][1] 2.0 or above installed.
-
-[1]: https://github.com/technomancy/leiningen
-
-## Running
-
-To start a web server for the application, run:
-
-    lein run 
-
-## License
-
-Copyright © 2021 FIXME
+To be coming soon: instant messaging, geo-"tags" (Leave notes @ on your location on a map, only those close enough can read), an email password-recovery mechanism, 2FA, and many more . . .
