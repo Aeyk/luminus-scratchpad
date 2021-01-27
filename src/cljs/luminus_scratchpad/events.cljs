@@ -80,19 +80,17 @@
 
 ;; *  event
 (rf/reg-event-db
- :event
+ :events
  (fn [db [_ event]]
    (update db :events (fnil conj []) event)))
 
-
-(rf/reg-event-fx
- :fetch-latest-messages
- (fn [_ _]
-   {:http-xhrio
-    {:method          :get
-     :uri             "/query/messsages"
-     :response-format (ajax/raw-response-format)}}))
-
+;; (rf/reg-event-fx
+;;  :fetch-latest-messages
+;;  (fn [_ _]
+;;    {:http-xhrio
+;;     {:method          :get
+;;      :uri             "/query/messsages"
+;;      :response-format (ajax/raw-response-format)}}))
 
 (rf/reg-sub
  :events

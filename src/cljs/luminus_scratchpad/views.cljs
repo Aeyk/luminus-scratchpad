@@ -10,8 +10,6 @@
             [quil.core :as q]
             [quil.middleware :as m]
             [luminus-scratchpad.websockets :as ws]
-            [luminus-scratchpad.handlers]
-            [luminus-scratchpad.subscriptions]
             [mantra.core :as mantra]))
 
 (defonce current-user (r/atom nil))
@@ -315,14 +313,14 @@
          [login-page]
          [:div #_{:action "/actions/send"}
           [:div
-           (for [message @(rf/subscribe [:events])]
-             [:p message])]
+           (for [[a b] @(rf/subscribe [:events])]
+             [:p (str a " " b)])]
           [:input.input {:value @message
                          :on-change #(reset! message (-> % .-target .-value))}]
           [:button.button
            {:on-click
             (fn [e]
-              (rf/dispatch [:event @message])
+              (rf/dispatch [:events @message])
               (reset! message ""))}
            "SEND"]])])))
 
