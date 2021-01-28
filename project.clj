@@ -53,7 +53,8 @@
                  [quil "3.1.0"]
                  [keybind "2.2.0"]
                  [thi.ng/geom "0.0.908"]
-                 [com.taoensso/timbre "5.1.0"]]
+                 [com.taoensso/sente        "1.16.0"]
+                 [com.taoensso/timbre       "4.10.0"]]
 
   :min-lein-version "2.0.0"
   
