@@ -307,6 +307,8 @@
 (defn chat-page []
   (let [message (r/atom "")
         messages (r/atom [])]
+    (ws/chsk-send! [:messages/recent
+                    (js/localStorage.getItem "scratch-client-name")])
     (fn []
       [:section.section>div.container>div.content
        (if (nil? @current-user)
@@ -321,6 +323,8 @@
            {:on-click
             (fn [e]
               (rf/dispatch [:events @message])
+              #_(ws/chsk-send! [:messages/recent] 1000 js/console.log)
+              (js/console.log @ws/chsk-state)
               (reset! message ""))}
            "SEND"]])])))
 

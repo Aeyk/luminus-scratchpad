@@ -39,7 +39,7 @@
       (sente/make-channel-socket-client!
         "/ws" ; Must match server Ring routing URL
         ?csrf-token
-        {:type   rand-chsk-type
+        {:type   :ws
          :packer packer})]
 
   (def chsk       chsk)
@@ -58,10 +58,15 @@
   [{:as ev-msg :keys [id ?data event]}]
   (-event-msg-handler ev-msg))
 
+
 (defmethod -event-msg-handler
   :default ; Default/fallback case (no other matching handler)
-  [{:as ev-msg :keys [event]}]
-  (->output! "Unhandled event: %s" event))
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (let [session (:session ring-req)
+        uid     (:uid     session)]
+    (debugf "Unhandled event: %s" event)
+    (when ?reply-fn
+      (?reply-fn {:umatched-event-as-echoed-from-server event}))))
 
 (defmethod -event-msg-handler :chsk/state
   [{:as ev-msg :keys [?data]}]
@@ -80,7 +85,7 @@
     (->output! "Handshake: %s" ?data)))
 
 (defonce router_ (atom nil))
-(defn  stop-router! [] (when-let [stop-f @router_] (stop-f)))
+(defn  stop-router! [] (when-let [stop-fn @router_] (stop-fn)))
 (defn start-router! []
   (stop-router!)
   (reset! router_

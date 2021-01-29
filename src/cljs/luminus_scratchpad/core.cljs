@@ -13,6 +13,7 @@
     [reitit.frontend.easy :as rfe]
     [clojure.string :as string]
     [ajax.core :refer [GET POST]]
+    [taoensso.sente  :as sente  :refer (cb-success?)]
     [luminus-scratchpad.views :as views])
   (:import goog.History
            (goog.crypt Hmac Sha512)))
@@ -49,7 +50,10 @@
 ;; Initialize app
 (defn ^:dev/after-load mount-components []
   (rf/clear-subscription-cache!)  
-  
+
+
+  (ws/start-router!)
+
   #_(ws/connect-ws
    (str "ws://" (.-host js/location) "/ws")
    #(rf/dispatch [:event %]))

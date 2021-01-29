@@ -50,6 +50,46 @@
              (when (not= old new)
                (infof "Connected uids change: %s" new))))
 
+;; * Sentes Event Handlers
+(defmulti -event-msg-handler
+  "Multimethod to handle Sente `event-msg`s"
+  :id ; Dispatch on event-id
+  )
+
+(defn event-msg-handler
+  "Wraps `-event-msg-handler` with logging, error catching, etc."
+  [{:as ev-msg :keys [id ?data event]}]
+  (-event-msg-handler ev-msg) ; Handle event-msgs on a single thread
+  ;; (future (-event-msg-handler ev-msg)) ; Handle event-msgs on a thread pool
+  )
+
+(defmethod -event-msg-handler
+  :default ; Default/fallback case (no other matching handler)
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (let [session (:session ring-req)
+        uid     (:uid     session)]
+    (debugf "Unhandled event: %s" event)
+    (when ?reply-fn
+      (?reply-fn {:umatched-event-as-echoed-from-server event}))))
+
+#_(defmethod -event-msg-handler :example/test-rapid-push
+  [ev-msg] (test-fast-server>user-pushes))
+
+#_(defmethod -event-msg-handler :example/toggle-broadcast
+  [{:as ev-msg :keys [?reply-fn]}]
+  (let [loop-enabled? (swap! broadcast-enabled?_ not)]
+    (?reply-fn loop-enabled?)))
+
+(defmethod -event-msg-handler :messages/recent
+  [{:as ev-msg :keys [id ?data event ?reply-fn]}]
+  (let [old-msgs (db/get-most-recent-messages {:count 7})]
+    (log/info old-msgs)
+    (doseq [uid (:any @connected-uids)]
+      (chsk-send! uid [:messages/recent [old-msgs]]))
+    (when ?reply-fn
+      (?reply-fn {:old-messages old-msgs
+                  :umatched-event-as-echoed-from-server event})))) 
+
 ;; * WebSocket Utils  etc
 (defonce channels (atom #{}))
 
@@ -85,10 +125,12 @@
 (defn login-handler [request]
   (let [email (get-in request [:body-params :email])
         password (get-in request [:body-params :password])
+        user (db/get-user-by-email {:email email})
+        session (:session request)
         valid?   (hashers/check
                   password
                   (:password
-                   (db/get-user-by-email {:email email})))]
+                    user))]
     (if valid?
       (do
         (let [claims {:user (keyword email)
@@ -96,7 +138,8 @@
                             (java.time.Instant/now) 3600)
                       #_(time/plus (time/now) (time/seconds 3600))}
               token (jwt/sign claims)]
-          (ok {:identity email
+          (ok {:session (assoc session :uid email)
+               :identity email
                :token token}))
         #_{:body {:identity (jwt/create-token {:id email})}})
       (bad-request {:auth [email password]
