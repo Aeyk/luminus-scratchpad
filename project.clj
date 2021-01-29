@@ -54,7 +54,8 @@
                  [keybind "2.2.0"]
                  [thi.ng/geom "0.0.908"]
                  [com.taoensso/sente        "1.16.0"]
-                 [com.taoensso/timbre       "4.10.0"]]
+                 [com.taoensso/timbre       "4.10.0"]
+                 [binaryage/dirac "1.7.2"]]
 
   :min-lein-version "2.0.0"
   
@@ -69,7 +70,11 @@
   :clean-targets ^{:protect false}
   [:target-path "target/cljsbuild"]
   :shadow-cljs
-  {:nrepl {:port 7002}
+  {:nrepl {:port 7002
+           :nrepl-middleware [dirac.nrepl/middleware]
+           :init (do
+                   (require 'dirac.agent)
+                   (dirac.agent/boot!))}}
    :builds
    {:app
     {:target :browser
@@ -77,7 +82,8 @@
      :asset-path "/js"
      :modules {:app {:entries [luminus-scratchpad.app]}}
      :devtools
-     {:watch-dir "resources/public" :preloads [re-frisk.preload]}
+     {:watch-dir "resources/public" :preloads [re-frisk.preload
+                                               dirac.runtime.preload]}
      :dev
      {:closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}}
     :test

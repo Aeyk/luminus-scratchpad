@@ -50,7 +50,7 @@
 (defn ^:dev/after-load mount-components []
   (rf/clear-subscription-cache!)  
   
-  (ws/connect-ws
+  #_(ws/connect-ws
    (str "ws://" (.-host js/location) "/ws")
    #(rf/dispatch [:event %]))
   

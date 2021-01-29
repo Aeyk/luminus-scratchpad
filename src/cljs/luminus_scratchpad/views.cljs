@@ -311,7 +311,7 @@
       [:section.section>div.container>div.content
        (if (nil? @current-user)
          [login-page]
-         [:div #_{:action "/actions/send"}
+         [:div#output #_{:action "/actions/send"}
           [:div
            (for [[a b] @(rf/subscribe [:events])]
              [:p (str a " " b)])]

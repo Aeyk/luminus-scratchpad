@@ -17,7 +17,38 @@
    [buddy.auth.accessrules :as acl]
    [ajax.core :refer [GET POST]]
    [cognitect.transit :as t]
-   [ring.util.http-response :as response]))
+   [ring.util.http-response :as response]
+   [clojure.core.async :as async  :refer (<! <!! >! >!! put! chan go go-loop)]
+   [taoensso.encore    :as encore :refer (have have?)]
+   [taoensso.timbre    :as timbre :refer (tracef debugf infof warnf errorf)]
+   [taoensso.sente.server-adapters.http-kit      :refer (get-sch-adapter)]
+   [taoensso.sente     :as sente]))
+
+;; * Sentes Websockets
+(let [;; Serialization format, must use same val for client + server:
+      packer :edn ; Default packer, a good choice in most cases
+      ;; (sente-transit/get-transit-packer) ; Needs Transit dep
+
+      chsk-server
+      (sente/make-channel-socket-server!
+       (get-sch-adapter) {:packer packer})
+
+      {:keys [ch-recv send-fn connected-uids
+              ajax-post-fn ajax-get-or-ws-handshake-fn]}
+      chsk-server]
+
+  (def ring-ajax-post                ajax-post-fn)
+  (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
+  (def ch-chsk                       ch-recv) ; ChannelSocket's receive channel
+  (def chsk-send!                    send-fn) ; ChannelSocket's send API fn
+  (def connected-uids                connected-uids) ; Watchable, read-only atom
+  )
+
+;; We can watch this atom for changes if we like
+(add-watch connected-uids :connected-uids
+           (fn [_ _ old new]
+             (when (not= old new)
+               (infof "Connected uids change: %s" new))))
 
 ;; * WebSocket Utils  etc
 (defonce channels (atom #{}))
@@ -38,7 +69,7 @@
     (send! channel msg)))
 
 ;; * WebSocket Handler
-(defn websocket-handler [request]
+(defn websocket-handler' [request]
   (with-channel request channel
     (connect! channel)
     (on-close channel (partial disconnect! channel))
@@ -74,10 +105,10 @@
 (defn home-routes []
   [""
    {}
-   ["/" {:middleware [middleware/wrap-csrf
+   ["/" {:middleware [#_#_middleware/wrap-csrf
                       middleware/wrap-formats]
          :get home-page}]
-;; * Check if logged in 
+;; * Check if logged in
    ["/me"
     {:middleware [middleware/wrap-auth]
      :get
@@ -141,7 +172,10 @@
                 (str (.getCause e))))))}}]
 
 ;; * WebSocket Routes
-   ["/ws" websocket-handler]
+   ["/ws" {:post ring-ajax-post
+           :get ring-ajax-get-or-ws-handshake}]
+   
+   #_["/ws" websocket-handler]
 ;; * Come with Luminus, just docs
    ["/docs" {:get (fn [_]
                     (-> (response/ok (-> "docs/docs.md" io/resource slurp))

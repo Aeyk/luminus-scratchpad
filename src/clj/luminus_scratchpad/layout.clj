@@ -5,7 +5,7 @@
     [selmer.filters :as filters]
     [markdown.core :refer [md-to-html-string]]
     [ring.util.http-response :refer [content-type ok]]
-    [ring.util.anti-forgery :refer [anti-forgery-field]]
+    [ring.util.anti-forgery :refer [anti-forgery-fiel]d]
     [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
     [ring.util.response]))
 

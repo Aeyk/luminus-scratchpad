@@ -2,6 +2,8 @@
   (:require
    [ring.util.http-response :as resp]
    [ring.middleware.flash :refer [wrap-flash]]
+   [ring.middleware.session :refer [wrap-session]]
+   [ring.middleware.keyword-params :refer [wrap-keyword-params]]
    [luminus-scratchpad.env :refer [defaults]]
    [luminus-scratchpad.auth :as auth]
    [clojure.tools.logging :as log]
@@ -101,6 +103,7 @@
   (-> ((:middleware defaults) handler)
       wrap-formats
       wrap-flash
+      wrap-anti-forgery
       (wrap-defaults
        (-> site-defaults
             (assoc-in [:security :anti-forgery] false)
