@@ -17,3 +17,4 @@ shadow-cljs.edn
 /node_modules
 /log
 /.idea/
+/.dir-locals.el
