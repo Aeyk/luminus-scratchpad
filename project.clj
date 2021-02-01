@@ -55,7 +55,8 @@
                  [thi.ng/geom "0.0.908"]
                  [com.taoensso/sente        "1.16.0"]
                  [com.taoensso/timbre       "4.10.0"]
-                 [binaryage/dirac "1.7.2"]]
+                 [binaryage/dirac "1.7.2"]
+                 ]
 
   :min-lein-version "2.0.0"
   
@@ -66,15 +67,19 @@
   :main ^:skip-aot luminus-scratchpad.core
 
   :plugins [[lein-shadow "0.2.0"]
-            [lein-kibit "0.1.2"]] 
+            [lein-kibit "0.1.2"]
+            [lein-cljfmt "0.7.0"]] 
   :clean-targets ^{:protect false}
   [:target-path "target/cljsbuild"]
   :shadow-cljs
-  {:nrepl {:port 7002
-           :nrepl-middleware [dirac.nrepl/middleware]
-           :init (do
-                   (require 'dirac.agent)
-                   (dirac.agent/boot!))}}
+  {:nrepl
+   {:port 7002
+    :nrepl-middleware [#_shadow.cljs.devtools.server.nrepl/middleware
+                       dirac.nrepl/middleware]
+    :init (do
+            (require 'dirac.agent)
+            (user/cljs-repl)
+            (dirac.agent/boot!))}}
    :builds
    {:app
     {:target :browser
@@ -82,14 +87,15 @@
      :asset-path "/js"
      :modules {:app {:entries [luminus-scratchpad.app]}}
      :devtools
-     {:watch-dir "resources/public" :preloads [re-frisk.preload
+     {:watch-dir "resources/public"
+      :preloads [re-frisk.preload
                                                dirac.runtime.preload]}
      :dev
      {:closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}}
     :test
     {:target :node-test
      :output-to "target/test/test.js"
-     :autorun true}}}
+     :autorun true}}
   
   :npm-deps []
   :npm-dev-deps [[xmlhttprequest "1.8.0"]]

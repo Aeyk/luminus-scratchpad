@@ -19,7 +19,28 @@
    [buddy.hashers :as hashers]
    [ajax.core :refer [GET POST]]
    [taoensso.timbre :as log]
-   [luminus-migrations.core :as migrations]))
+   [luminus-migrations.core :as migrations]
+   [shadow.cljs.devtools.api :as shadow]
+   [shadow.cljs.devtools.server :as server]))
+
+(defmacro jit [sym]
+  `(requiring-resolve '~sym))
+
+(defn cljs-repl
+  ([]
+   (cljs-repl :app))
+  ([build-id]
+   (server/start!)
+   (shadow/watch build-id)
+   (loop []
+     (println "Trying to connect")
+     (when (nil? @@(jit shadow.cljs.devtools.server.runtime/instance-ref))
+       (Thread/sleep 1000)
+       (recur)))
+   ((jit shadow.cljs.devtools.api/nrepl-select) build-id)))
+
+(mount/defstate cljs-build
+  :start (cljs-repl))
 
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
 
