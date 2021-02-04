@@ -14,7 +14,6 @@
 
 (defonce current-user (r/atom nil))
 
-
 (defn logout-handler []
   (reset! current-user nil)
   (js/localStorage.removeItem "scratch-client-key")

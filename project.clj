@@ -68,13 +68,15 @@
 
   :plugins [[lein-shadow "0.2.0"]
             [lein-kibit "0.1.2"]
-            [lein-cljfmt "0.7.0"]] 
+            [lein-cljfmt "0.7.0"]
+            [cider/cider-nrepl "0.25.5"]] 
   :clean-targets ^{:protect false}
   [:target-path "target/cljsbuild"]
   :shadow-cljs
   {:nrepl
    {:port 7002
-    :nrepl-middleware [#_shadow.cljs.devtools.server.nrepl/middleware
+    :nrepl-middleware [cider.piggieback/wrap-cljs-repl
+                       #_shadow.cljs.devtools.server.nrepl/middleware
                        dirac.nrepl/middleware]
     :init (do
             (require 'dirac.agent)
@@ -123,12 +125,13 @@
                                  [ring/ring-mock "0.4.0"]]
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.24.1"]
                                  [jonase/eastwood "0.3.5"]] 
-                  
-                  
                   :source-paths ["env/dev/clj"  "env/dev/cljs" "test/cljs" ]
                   :resource-paths ["env/dev/resources"]
-                  :repl-options {:init-ns user
-                                 :timeout 120000}
+                  :repl-options
+                  {:init-ns user
+                   :repl-middleware
+                   [shadow.cljs.devtools.server.nrepl/middleware]
+                   :timeout 120000}
                   :injections [(require 'pjstadig.humane-test-output)
                                (pjstadig.humane-test-output/activate!)]}
    :project/test {:jvm-opts ["-Dconf=test-config.edn" ]

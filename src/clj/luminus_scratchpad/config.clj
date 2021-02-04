@@ -27,4 +27,5 @@
    {:host (:smtp-host env)
     :user (:smtp-user env)
     :pass (:smtp-pass env)
-    :from (:smtp-from env)}})
+    :from (:smtp-from env)
+    :port (:smtp-port env)}})

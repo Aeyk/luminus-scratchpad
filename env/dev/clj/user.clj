@@ -1,4 +1,4 @@
-(ns user
+(ns user 
   "Userspace functions you can run by default in your local REPL."
   (:require
    [luminus-scratchpad.config :refer [env]]
@@ -20,27 +20,7 @@
    [ajax.core :refer [GET POST]]
    [taoensso.timbre :as log]
    [luminus-migrations.core :as migrations]
-   [shadow.cljs.devtools.api :as shadow]
-   [shadow.cljs.devtools.server :as server]))
-
-(defmacro jit [sym]
-  `(requiring-resolve '~sym))
-
-(defn cljs-repl
-  ([]
-   (cljs-repl :app))
-  ([build-id]
-   (server/start!)
-   (shadow/watch build-id)
-   (loop []
-     (println "Trying to connect")
-     (when (nil? @@(jit shadow.cljs.devtools.server.runtime/instance-ref))
-       (Thread/sleep 1000)
-       (recur)))
-   ((jit shadow.cljs.devtools.api/nrepl-select) build-id)))
-
-(mount/defstate cljs-build
-  :start (cljs-repl))
+))
 
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
 
@@ -96,7 +76,9 @@
     (mount/stop)
     (mount/start))
 
-
+  (defmacro jit [sym]
+    `(requiring-resolve '~sym))
+  
   (do 
     (reset-db)
     (migrate))
@@ -137,7 +119,7 @@
   {:headers
      {identity
       (jwt/create-token {:id "mksybr@gmail.com"})}
-     :handler (fn [ok] ok)}q
+     :handler (fn [ok] ok)}
   
   (GET
    "/me"
@@ -172,7 +154,7 @@
   (do
     (mount/stop)
     (mount/start))
-
+ 
   (db/add-listener
    db/notifications-connection
    "events"

@@ -18,35 +18,9 @@
      :text    "Hello!"}
     :magic-link
     {:portal
-     {:subject "Jää- ja uimahalliportaalit ovat nyt Lipaksessa"
+     {:subject "Click this to activate your account!"
       :html    "<html><body>Hello!</body></html>"
-      :text    "Hello!"}
-     :lipas
-     {:subject "LIPAS sisäänkirjautumislinkki"
-      :html    "<html><body>Hello!</body></html>"
-      :text    "Hello!"}}
-    :reminder
-    {:subject "LIPAS-muistutus"
-     :html    "<html><body>Hello!</body></html>"
-     :text    "Hello!"}}
-#_#_   :fi
-   {:permissions-updated
-    {:subject "Käyttöikeutesi on päivitetty"
-     :html    (slurp (io/resource "email_templates/permissions_updated_fi.html"))
-     :text    (slurp (io/resource "email_templates/permissions_updated_fi.txt"))}
-    :magic-link
-    {:portal
-     {:subject "Jää- ja uimahalliportaalit ovat nyt Lipaksessa"
-      :html    (slurp (io/resource "email_templates/magic_link_portal_fi.html"))
-      :text    (slurp (io/resource "email_templates/magic_link_portal_fi.txt"))}
-     :lipas
-     {:subject "LIPAS sisäänkirjautumislinkki"
-      :html    (slurp (io/resource "email_templates/magic_link_lipas_fi.html"))
-      :text    (slurp (io/resource "email_templates/magic_link_lipas_fi.txt"))}}
-    :reminder
-    {:subject "LIPAS-muistutus"
-     :html    (slurp (io/resource "email_templates/reminder_fi.html"))
-     :text    (slurp (io/resource "email_templates/reminder_fi.txt"))}}})
+      :text    "Hello!"}}}})
 
 (defn send*!
   "Thin wrapper for postal."
@@ -66,8 +40,8 @@
 
 (defn send-reset-password-email!
   [emailer to {:keys [link]}]
-  (.send! emailer {:subject "Salasanan vaihtolinkki"
-                   :to      to
+  (.send! emailer {:subject "Reset Password"
+                   :tofg      to
                    :plain   (str link)
                    :html    (str "<html><body>" link "</body></html>")}))
 
@@ -92,7 +66,7 @@
 
 (defn send-register-notification!
   [emailer to user]
-  (.send! emailer {:subject "Uusi rekisteröitynyt käyttäjä"
+  (.send! emailer {:subject "Register Notification"
                    :to      to
                    :plain   (with-out-str (pprint/pprint user))
                    :html    (str "<html><body>"
@@ -146,20 +120,20 @@
 
 (comment
   (require '[luminus-scratchpad.config :as config])
-  
+
 (:emailer config/default-config)
 
-(.send! emailer2
- {:from "mksybr@gmail.com"
+(.send! emailer
+ {:from "me@pinellas.space"
   :to "mksybr@gmail.com"
   :subject "Hello!"
   :body "Hello!"})
 
   (def emailer (SMTPEmailer. (-> config/default-config :emailer)))
   (def emailer (SMTPEmailer. (-> config/default-config :emailer)))
-  (def emailer2 (SMTPEmailer. (-> config/default-config
-                                  :emailer
-                                  (assoc :from "mksybr@gmail.com"))))
+  (def emailer2 (SMTPEmailer. (-> config/default-config)
+                              :emailer
+                              (assoc :from "mksybr@gmail.com")))
   emailer2
   (send-permissions-updated-email! emailer2 "mksybr@gmail.com"
                                    {:link "www.kissa.fi" :valid-days 1}))

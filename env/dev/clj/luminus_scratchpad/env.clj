@@ -2,6 +2,9 @@
   (:require
     [selmer.parser :as parser]
     [clojure.tools.logging :as log]
+    [shadow.cljs.devtools.server :as server]
+    [shadow.cljs.devtools.api :as shadow]
+    [mount.core :as mount]
     [luminus-scratchpad.dev-middleware :refer [wrap-dev]]))
 
 (def defaults

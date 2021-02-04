@@ -50,8 +50,7 @@
 ;; Initialize app
 (defn ^:dev/after-load mount-components []
   (rf/clear-subscription-cache!)  
-
-
+  
   (ws/start-router!)
 
   #_(ws/connect-ws
@@ -60,6 +59,7 @@
   
   (if (not (nil? (js/localStorage.getItem "scratch-client-name")))
     (reset! views/current-user (js/localStorage.getItem "scratch-client-name")))
+
   (rdom/render [#'views/page] (.getElementById js/document "app")))
 
 (defn init! []

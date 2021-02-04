@@ -5,6 +5,8 @@
     [luminus.http-server :as http]
     [luminus-migrations.core :as migrations]
     [luminus-scratchpad.config :refer [env]]
+    [shadow.cljs.devtools.api :as shadow]
+    [shadow.cljs.devtools.server :as shadow-server]
     [clojure.tools.cli :refer [parse-opts]]
     [clojure.tools.logging :as log]
     [mount.core :as mount])
@@ -31,6 +33,20 @@
         (select-keys [:handler :host :port])))
   :stop
   (http/stop http-server))
+
+(defn start-cljs-repl []
+  (shadow-server/start!)
+  (shadow/watch :app)
+  (shadow/watch :test)
+  (shadow/nrepl-select :app))
+
+
+(mount/defstate ^{:on-reload :noop} cljs-repl-server
+  :start
+  (start-cljs-repl)
+  :stop
+  (shadow-server/stop!))
+
 
 (mount/defstate ^{:on-reload :noop} repl-server
   :start
