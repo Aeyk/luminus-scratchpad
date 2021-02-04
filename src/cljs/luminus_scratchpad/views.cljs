@@ -1,4 +1,4 @@
-(ns luminus-scratchpad.views
+4(ns luminus-scratchpad.views
   (:require [reagent.core :as r]
             [reagent.dom :as rd]
             [reitit.core :as reitit]
@@ -306,6 +306,8 @@
 (defn chat-page []
   (let [message (r/atom "")
         messages (r/atom [])]
+    (rf/dispatch [:fetch-latest-messages
+                  :load-fetched-messages])
     (ws/chsk-send! [:messages/recent
                     (js/localStorage.getItem "scratch-client-name")])
     (fn []
@@ -314,8 +316,9 @@
          [login-page]
          [:div#output #_{:action "/actions/send"}
           [:div
-           (for [[a b] @(rf/subscribe [:events])]
-             [:p (str a " " b)])]
+           (for [[_ chat-messages] @(rf/subscribe [:events])]
+             (for [chat-message chat-messages]
+               [:p chat-message]))]
           [:input.input {:value @message
                          :on-change #(reset! message (-> % .-target .-value))}]
           [:button.button

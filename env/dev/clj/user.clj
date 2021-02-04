@@ -19,8 +19,7 @@
    [buddy.hashers :as hashers]
    [ajax.core :refer [GET POST]]
    [taoensso.timbre :as log]
-   [luminus-migrations.core :as migrations]
-))
+   [luminus-migrations.core :as migrations]))
 
 (alter-var-root #'s/*explain-out* (constantly expound/printer))
 

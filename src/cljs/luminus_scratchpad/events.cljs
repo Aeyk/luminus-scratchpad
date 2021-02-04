@@ -6,7 +6,6 @@
     [reitit.frontend.controllers :as rfc]))
 
 ;;dispatchers
-
 (rf/reg-event-db
   :common/navigate
   (fn [db [_ match]]
@@ -89,11 +88,23 @@
  (fn [_ _]
    {:http-xhrio
     {:method          :get
-     :uri             "/query/messsages"
-     :response-format (ajax/raw-response-format)}}))
+     :uri             "/query/messages"
+     :response-format (ajax/raw-response-format)
+     :on-success [:load-fetched-messages]
+     :on-failure []}}))
+
+(rf/reg-event-db
+ :load-fetched-messages
+ (fn [db [_ result]]
+   (assoc db :chat/messages 
+          (js->clj (js/JSON.parse result)
+                   :keywordize-keys true))))
 
 (rf/reg-sub
  :events
  (fn [db _]
-   {:dispatch [:fetch-latest-messages]
+   {:dispatch [:fetch-latest-messages
+               :load-fetched-messages]
+    :chat/messages
+    (map :content (:chat/messages db))
     :events (:events db)}))

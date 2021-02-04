@@ -41,11 +41,11 @@
   (shadow/nrepl-select :app))
 
 
-(mount/defstate ^{:on-reload :noop} cljs-repl-server
-  :start
-  (start-cljs-repl)
-  :stop
-  (shadow-server/stop!))
+;; (mount/defstate ^{:on-reload :noop} cljs-repl-server
+;;   :start
+;;   (start-cljs-repl)
+;;   :stop
+;;   (shadow-server/stop!))
 
 
 (mount/defstate ^{:on-reload :noop} repl-server
