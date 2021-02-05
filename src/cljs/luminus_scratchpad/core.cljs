@@ -64,5 +64,6 @@
 
 (defn init! []
   (start-router!)
+  (sente/chsk-connect! ws/chsk)
   (ajax/load-interceptors!)
   (mount-components))

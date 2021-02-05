@@ -1,16 +1,18 @@
-4(ns luminus-scratchpad.views
-  (:require [reagent.core :as r]
-            [reagent.dom :as rd]
-            [reitit.core :as reitit]
-            [re-frame.core :as rf]
-            [markdown.core :refer [md->html]]
-            [ajax.core :refer [GET POST]]
-            [music-theory.pitch :as pitch]
-            [music-theory.chord :as chord]
-            [quil.core :as q]
-            [quil.middleware :as m]
-            [luminus-scratchpad.websockets :as ws]
-            [mantra.core :as mantra]))
+(ns luminus-scratchpad.views
+  (:require
+   [reagent.core :as r]
+   [reagent.dom :as rd]
+   [reitit.core :as reitit]
+   [re-frame.core :as rf]
+   [markdown.core :refer [md->html]]
+   [ajax.core :refer [GET POST]]
+   [music-theory.pitch :as pitch]
+   [music-theory.chord :as chord]
+   [quil.core :as q]
+   [quil.middleware :as m]
+   [luminus-scratchpad.websockets :as ws]
+   [taoensso.sente  :as sente  :refer (cb-success?)]
+   [mantra.core :as mantra]))
 
 (defonce current-user (r/atom nil))
 
@@ -218,6 +220,7 @@
                  (fn [{:keys [status status-text fail response] :as err}]
                    (swap! state assoc :flash [status status-text (get-in response [:status :type])])
                    (js/console.log @state))})
+
                ;; * Check Auth
                (GET "/me"
                     {:headers {"Accept" "application/json"
@@ -306,9 +309,17 @@
 (defn chat-page []
   (let [message (r/atom "")
         messages (r/atom [])]
+
+        
+    #_(cljs.core.async/go-loop []
+      (let [{:as ev-msg :keys [event]}
+            (cljs.core.async/<!  ws/chsk)]
+          (js/console.log #_event-handler event)))
+
+    
     (rf/dispatch [:fetch-latest-messages
                   :load-fetched-messages])
-    (ws/chsk-send! [:messages/recent
+    #_(ws/chsk-send! [:messages/recent
                     (js/localStorage.getItem "scratch-client-name")])
     (fn []
       [:section.section>div.container>div.content
@@ -330,4 +341,11 @@
               (reset! message ""))}
            "SEND"]])])))
 
+#_#_
+(GET "/params"
+     {:headers {"Accept" "application/json"
+                "Authorization"
+                (str "Token " (js/localStorage.getItem "scratch-client-key"))}} )
+
+(js/alert "Hello")
 

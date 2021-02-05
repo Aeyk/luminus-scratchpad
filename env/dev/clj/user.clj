@@ -147,9 +147,9 @@
   {:email "1" :password ""}
 
     (create-migration "add-messages-table")
+    (create-migration "enable-pg_notify")
 
-  (create-migration "enable-pg_notify")
-
+  
   (do
     (mount/stop)
     (mount/start))

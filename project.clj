@@ -56,6 +56,7 @@
                  [com.taoensso/sente        "1.16.0"]
                  [com.taoensso/timbre       "4.10.0"]
                  [binaryage/dirac "1.7.2"]
+                 [devcards "0.2.6"]
                  ]
 
   :min-lein-version "2.0.0"
@@ -87,7 +88,9 @@
     {:target :browser
      :output-dir "target/cljsbuild/public/js"
      :asset-path "/js"
-     :modules {:app {:entries [luminus-scratchpad.app]}}
+     :modules {:main {:init-fn luminus-scratchpad.core/start}
+               :app {:entries [luminus-scratchpad.app]}}
+     :compiler-options {:devcards :true}
      :devtools
      {:watch-dir "resources/public"
       :preloads [re-frisk.preload

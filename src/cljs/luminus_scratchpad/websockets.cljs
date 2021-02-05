@@ -14,7 +14,7 @@
 
 (defn ->output! [fmt & args]
   (let [msg (apply encore/format fmt args)]
-    (timbre/debug msg)))
+    (timbre/debugf msg)))
 
 (->output! "ClojureScript appears to have loaded correctly.")
 
@@ -27,11 +27,7 @@
   (->output! "CSRF token detected in HTML, great!")
   (->output! "CSRF token NOT detected in HTML, default Sente config will reject requests"))
 
-(let [;; For this example, select a random protocol:
-      rand-chsk-type (if (>= (rand) 0.5) :ajax :auto)
-      _ (->output! "Randomly selected chsk type: %s" rand-chsk-type)
-
-      ;; Serializtion format, must use same val for client + server:
+(let [;; Serializtion format, must use same val for client + server:
       packer :edn ; Default packer, a good choice in most cases
       ;; (sente-transit/get-transit-packer) ; Needs Transit dep
 
@@ -83,6 +79,16 @@
   [{:as ev-msg :keys [?data]}]
   (let [[?uid ?csrf-token ?handshake-data] ?data]
     (->output! "Handshake: %s" ?data)))
+
+(defmethod -event-msg-handler :messages/recent
+  [{:as ev-msg :keys [?data]}]
+  (let [[?uid ?csrf-token ?handshake-data] ?data]
+    (->output! "Data: %s" ?data)))
+
+
+(go-loop []
+  (let [{:as ev-msg :keys [event]} (<! (:ch-chsk chsk))]
+    (js/console.log #_event-handler event)))
 
 (defonce router_ (atom nil))
 (defn  stop-router! [] (when-let [stop-fn @router_] (stop-fn)))

@@ -24,6 +24,11 @@
    [taoensso.sente.server-adapters.http-kit      :refer (get-sch-adapter)]
    [taoensso.sente     :as sente]))
 
+(defn set-user! [id {session :session}]
+  (-> (resp/response (str "User set to: " id))
+      (assoc :session (assoc session :user id))
+      (assoc :headers {"Content-Type" "text/plain"})))
+
 ;; * Sentes Websockets
 (let [;; Serialization format, must use same val for client + server:
       packer :edn ; Default packer, a good choice in most cases
@@ -43,6 +48,10 @@
   (def chsk-send!                    send-fn) ; ChannelSocket's send API fn
   (def connected-uids                connected-uids) ; Watchable, read-only atom
   )
+
+(defn broadcast-to-all-connections [payload]
+  (for [connection (:any @connected-uids)]
+    (chsk-send! connection payload)))
 
 ;; We can watch this atom for changes if we like
 (add-watch connected-uids :connected-uids
@@ -85,7 +94,7 @@
   (let [old-msgs (db/get-most-recent-messages {:count 7})]
     (log/info old-msgs)
     (doseq [uid (:any @connected-uids)]
-      (chsk-send! uid [:messages/recent [old-msgs]]))
+      (chsk-send! uid [:chsk/state [old-msgs]]))
     (when ?reply-fn
       (?reply-fn {:old-messages old-msgs
                   :umatched-event-as-echoed-from-server event})))) 
@@ -138,9 +147,11 @@
                             (java.time.Instant/now) 3600)
                       #_(time/plus (time/now) (time/seconds 3600))}
               token (jwt/sign claims)]
-          (ok {:session (assoc session :uid email)
-               :identity email
-               :token token}))
+          (ok
+           (set-user!
+            {:session (assoc session :uid email)
+             :identity email
+             :token token})))
         #_{:body {:identity (jwt/create-token {:id email})}})
       (bad-request {:auth [email password]
                     :message "Incorrect Email or Password."}))))
@@ -151,7 +162,14 @@
    ["/" {:middleware [#_#_middleware/wrap-csrf
                       middleware/wrap-formats]
          :get home-page}]
-;; * Check if logged in
+   ;; * Get Request and Response
+   ["/params"
+    {:get
+     (fn [req]
+       {:headers {"Content-Type" "text/plain"}
+        :status 200
+        :body (:session req)})}]
+   ;; * Check if logged in
    ["/me"
     {:middleware [middleware/wrap-auth]
      :get

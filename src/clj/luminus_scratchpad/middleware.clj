@@ -102,10 +102,12 @@
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-formats
+      wrap-session
       wrap-flash
       wrap-anti-forgery
       (wrap-defaults
        (-> site-defaults
             (assoc-in [:security :anti-forgery] false)
             (assoc-in [:session :store] (ttl-memory-store (* 60 30)))))
+#_      wrap-context
       wrap-internal-error))
